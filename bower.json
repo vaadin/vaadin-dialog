@@ -24,12 +24,21 @@
     "wct.conf.js"
   ],
   "dependencies": {
-    "polymer": "^2.0.0"
+    "polymer": "^2.0.0",
+    "inert": "git://github.com/WICG/inert.git#^1.1.4",
+    "vaadin-overlay": "^1.0.0",
+    "vaadin-themable-mixin": "^1.0.0"
   },
   "devDependencies": {
     "elements-demo-resources": "^2.0.0",
     "iron-component-page": "^3.0.0",
     "iron-demo-helpers": "^2.0.0",
+    "iron-test-helpers": "^2.0.0",
+    "vaadin-button": "^1.0.0",
+    "vaadin-radio-button": "^1.0.0-alpha1",
     "web-component-tester": "^6.0.0"
+  },
+  "resolutions": {
+    "vaadin-themable-mixin": "^1.0.0"
   }
 }

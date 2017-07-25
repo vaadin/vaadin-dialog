@@ -1,0 +1,275 @@
+{
+  "schema_version": "1.0.0",
+  "namespaces": [
+    {
+      "name": "Vaadin",
+      "description": "",
+      "summary": "",
+      "sourceRange": {
+        "file": "vaadin-dialog.html",
+        "start": {
+          "line": 222,
+          "column": 6
+        },
+        "end": {
+          "line": 222,
+          "column": 42
+        }
+      }
+    }
+  ],
+  "elements": [
+    {
+      "description": "",
+      "summary": "",
+      "path": "vaadin-dialog.html",
+      "properties": [
+        {
+          "name": "closeOnOutsideClick",
+          "type": "boolean",
+          "description": "Set to true to enable closing dialog on outside click",
+          "privacy": "public",
+          "sourceRange": {
+            "start": {
+              "line": 115,
+              "column": 12
+            },
+            "end": {
+              "line": 119,
+              "column": 13
+            }
+          },
+          "metadata": {
+            "polymer": {}
+          },
+          "defaultValue": "false"
+        },
+        {
+          "name": "closeOnEsc",
+          "type": "boolean",
+          "description": "Set to false to disable closing dialog on Escape press",
+          "privacy": "public",
+          "sourceRange": {
+            "start": {
+              "line": 124,
+              "column": 12
+            },
+            "end": {
+              "line": 128,
+              "column": 13
+            }
+          },
+          "metadata": {
+            "polymer": {}
+          },
+          "defaultValue": "true"
+        },
+        {
+          "name": "horizontalAlign",
+          "type": "string",
+          "description": "Horizontal alignment, possible values: `'left'`, `'center'`, `'right'`",
+          "privacy": "public",
+          "sourceRange": {
+            "start": {
+              "line": 133,
+              "column": 12
+            },
+            "end": {
+              "line": 136,
+              "column": 13
+            }
+          },
+          "metadata": {
+            "polymer": {}
+          }
+        },
+        {
+          "name": "verticalAlign",
+          "type": "string",
+          "description": "Vertical alignment, possible values: `'top'`, `'middle'`, `'bottom'`",
+          "privacy": "public",
+          "sourceRange": {
+            "start": {
+              "line": 141,
+              "column": 12
+            },
+            "end": {
+              "line": 144,
+              "column": 13
+            }
+          },
+          "metadata": {
+            "polymer": {}
+          }
+        }
+      ],
+      "methods": [
+        {
+          "name": "ready",
+          "description": "",
+          "privacy": "protected",
+          "sourceRange": {
+            "start": {
+              "line": 174,
+              "column": 8
+            },
+            "end": {
+              "line": 186,
+              "column": 9
+            }
+          },
+          "metadata": {},
+          "params": []
+        },
+        {
+          "name": "_handleOutsideClick",
+          "description": "Handle outside click and close the dialog if close-on-outside-click is true",
+          "privacy": "protected",
+          "sourceRange": {
+            "start": {
+              "line": 191,
+              "column": 8
+            },
+            "end": {
+              "line": 195,
+              "column": 9
+            }
+          },
+          "metadata": {},
+          "params": [
+            {
+              "name": "e"
+            }
+          ]
+        },
+        {
+          "name": "_handleEscPress",
+          "description": "Handle ESC press and close the dialog if close-on-esc is true",
+          "privacy": "protected",
+          "sourceRange": {
+            "start": {
+              "line": 200,
+              "column": 8
+            },
+            "end": {
+              "line": 204,
+              "column": 9
+            }
+          },
+          "metadata": {},
+          "params": [
+            {
+              "name": "e"
+            }
+          ]
+        },
+        {
+          "name": "_trapFocus",
+          "description": "Trap/untrap focus within the dialog, https://youtu.be/JS68faEUduk?t=7m40s",
+          "privacy": "protected",
+          "sourceRange": {
+            "start": {
+              "line": 209,
+              "column": 8
+            },
+            "end": {
+              "line": 215,
+              "column": 9
+            }
+          },
+          "metadata": {},
+          "params": []
+        }
+      ],
+      "staticMethods": [],
+      "demos": [],
+      "metadata": {},
+      "sourceRange": {
+        "start": {
+          "line": 105,
+          "column": 6
+        },
+        "end": {
+          "line": 216,
+          "column": 7
+        }
+      },
+      "privacy": "public",
+      "superclass": "HTMLElement",
+      "name": "VaadinDialog",
+      "attributes": [
+        {
+          "name": "close-on-outside-click",
+          "description": "Set to true to enable closing dialog on outside click",
+          "sourceRange": {
+            "start": {
+              "line": 115,
+              "column": 12
+            },
+            "end": {
+              "line": 119,
+              "column": 13
+            }
+          },
+          "metadata": {},
+          "type": "boolean"
+        },
+        {
+          "name": "close-on-esc",
+          "description": "Set to false to disable closing dialog on Escape press",
+          "sourceRange": {
+            "start": {
+              "line": 124,
+              "column": 12
+            },
+            "end": {
+              "line": 128,
+              "column": 13
+            }
+          },
+          "metadata": {},
+          "type": "boolean"
+        },
+        {
+          "name": "horizontal-align",
+          "description": "Horizontal alignment, possible values: `'left'`, `'center'`, `'right'`",
+          "sourceRange": {
+            "start": {
+              "line": 133,
+              "column": 12
+            },
+            "end": {
+              "line": 136,
+              "column": 13
+            }
+          },
+          "metadata": {},
+          "type": "string"
+        },
+        {
+          "name": "vertical-align",
+          "description": "Vertical alignment, possible values: `'top'`, `'middle'`, `'bottom'`",
+          "sourceRange": {
+            "start": {
+              "line": 141,
+              "column": 12
+            },
+            "end": {
+              "line": 144,
+              "column": 13
+            }
+          },
+          "metadata": {},
+          "type": "string"
+        }
+      ],
+      "events": [],
+      "styling": {
+        "cssVariables": [],
+        "selectors": []
+      },
+      "slots": [],
+      "tagname": "vaadin-dialog"
+    }
+  ]
+}

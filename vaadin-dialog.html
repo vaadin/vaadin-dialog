@@ -5,42 +5,214 @@ This program is available under Apache License Version 2.0, available at https:/
 -->
 
 <link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../vaadin-overlay/vaadin-overlay.html">
+<link rel="import" href="../vaadin-themable-mixin/vaadin-themable-mixin.html">
+<script src="../inert/dist/inert.min.js"></script>
 
-<dom-module id="vaadin-dialog">
+<dom-module id="vaadin-dialog-default-theme">
+  <template>
+    <style>
+      [part="dialog"] {
+        padding: 24px;
+      }
+
+      [part="title"] {
+        font-size: 20px;
+        font-weight: bold;
+      }
+
+      [part="title"],
+      [part="content"] {
+        margin-bottom: 20px;
+      }
+    </style>
+  </template>
+</dom-module>
+
+<dom-module id="vaadin-dialog-template">
   <template>
     <style>
       :host {
-        display: inline-block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      :host([horizontal-align="left"]) {
+        justify-content: flex-start;
+      }
+
+      :host([horizontal-align="right"]) {
+        justify-content: flex-end;
+      }
+
+      :host([vertical-align="top"]) {
+        align-items: flex-start;
+      }
+
+      :host([vertical-align="bottom"]) {
+        align-items: flex-end;
+      }
+
+      [part="dialog"] {
+        background: white;
+        text-align: center;
+        width: 500px;
+        max-width: 100%;
+        box-sizing: border-box;
       }
     </style>
-    <slot></slot>
-  </template>
 
+    <slot name="title" part="title"></slot>
+    <slot name="content" part="content"></slot>
+    <slot name="actions" part="actions"></slot>
+  </template>
   <script>
     if (!Polymer.Element) {
       throw new Error(`Unexpected Polymer version ${Polymer.version} is used, expected v2.0.0 or later.`);
     }
 
-    (function() {
+    {
       /**
-       * `<vaadin-dialog>` is a Polymer 2 element.
+       * `<vaadin-dialog>` is a Polymer 2 element for customised modal dialogs.
        *
        * ```html
-       * <vaadin-dialog>
+       * <vaadin-dialog opened>
+       *   Sample dialog
        * </vaadin-dialog>
        * ```
        *
+       * ### Styling
+       *
+       * The following shadow DOM parts are exposed for styling:
+       *
+       * Part name         | Description
+       * ------------------|----------------
+       * `dialog`          | The dialog
+       * `title`           | The title block
+       * `content`         | The content block
+       * `actions`         | The actions block
+       * `backdrop`        | The backdrop
+       *
        * @memberof Vaadin
+       * @mixes Vaadin.ThemableMixin
        * @demo demo/index.html
        */
-      class VaadinDialog extends Polymer.Element {
+
+      let memoizedTemplate;
+
+      class VaadinDialog extends Vaadin.ThemableMixin(Vaadin.OverlayElement) {
         static get is() {
           return 'vaadin-dialog';
         }
 
         static get properties() {
           return {
+            /**
+             * Set to true to enable closing dialog on outside click
+             */
+            closeOnOutsideClick: {
+              type: Boolean,
+              value: false,
+              reflectToAttribute: true,
+            },
+
+            /**
+             * Set to false to disable closing dialog on Escape press
+             */
+            closeOnEsc: {
+              type: Boolean,
+              value: true,
+              reflectToAttribute: true,
+            },
+
+            /**
+             * Horizontal alignment, possible values: `'left'`, `'center'`, `'right'`
+             */
+            horizontalAlign: {
+              type: String,
+              reflectToAttribute: true,
+            },
+
+            /**
+             * Vertical alignment, possible values: `'top'`, `'middle'`, `'bottom'`
+             */
+            verticalAlign: {
+              type: String,
+              reflectToAttribute: true,
+            },
           };
+        }
+
+        static get template() {
+          if (!memoizedTemplate) {
+            // Clone the superclass (vaadin-overlay) template
+            memoizedTemplate = super.template.cloneNode(true);
+
+            // Retrieve dialog's parts
+            const dialogTemplate = Polymer.DomModule.import(this.is + '-template', 'template');
+            const dialogSlots = dialogTemplate.content.querySelectorAll('slot');
+
+            // Append dialog's styles to the overlay's template
+            const styles = dialogTemplate.content.querySelector('style');
+            memoizedTemplate.content.appendChild(styles);
+
+            // Append dialog's parts to the overlay's template
+            const overlayContent = memoizedTemplate.content.querySelector('[part="content"]');
+            for (const slot of dialogSlots) {
+              overlayContent.appendChild(slot);
+            }
+
+            // Rename overlay's [part="content"] to [part="dialog"] for exposing
+            overlayContent.setAttribute('part', 'dialog');
+          }
+
+          return memoizedTemplate;
+        }
+
+        ready() {
+          super.ready();
+
+          this.setAttribute('role', 'dialog');
+          this.withBackdrop = true;
+
+          this.addEventListener('vaadin-overlay-outside-click', this._handleOutsideClick);
+          this.addEventListener('vaadin-overlay-escape-press', this._handleEscPress);
+
+          this.addEventListener('opened-changed', () => {
+            this._trapFocus();
+          });
+        }
+
+        /**
+         * Handle outside click and close the dialog if `closeOnOutsideClick` is true
+         */
+        _handleOutsideClick(e) {
+          if (!this.closeOnOutsideClick) {
+            e.preventDefault();
+          }
+        }
+
+        /**
+         * Handle ESC press and close the dialog if `closeOnEsc` is true
+         */
+        _handleEscPress(e) {
+          if (!this.closeOnEsc) {
+            e.preventDefault();
+          }
+        }
+
+        /**
+         * Trap/untrap focus within the dialog, https://youtu.be/JS68faEUduk?t=7m40s
+         */
+        _trapFocus() {
+          Array.from(document.body.children).forEach(child => {
+            if (child !== this) {
+              child.inert = this.opened;
+            }
+          });
         }
       }
 
@@ -50,6 +222,6 @@ This program is available under Apache License Version 2.0, available at https:/
        */
       window.Vaadin = window.Vaadin || {};
       Vaadin.VaadinDialog = VaadinDialog;
-    })();
+    }
   </script>
 </dom-module>

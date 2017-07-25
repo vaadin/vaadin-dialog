@@ -16,10 +16,78 @@
 
     <demo-navigation></demo-navigation>
 
-    <h3>Sample example</h3>
+    <h3>Parts: Title, Content, Actions</h3>
     <demo-snippet>
       <template>
-        <vaadin-dialog>Foobar</vaadin-dialog>
+        <vaadin-dialog id="parts-example">
+          <template>
+            <div part="title">
+              Awesome
+            </div>
+            <div part="content">
+              An overused adjective intended to denote something as "cool" or "great" but instead winds up meaning "lame." This is actually a reflection of the lameness of person using the word, the degree of which is directly proportionate to difference between the user's perspective of the so-called awesome object / person / situation and that of a reasonably sober, well-informed observer.
+            </div>
+            <div part="actions">
+              <vaadin-button id="ok-button">OK</vaadin-button>
+            </div>
+          </template>
+        </vaadin-dialog>
+        <vaadin-button id="show-parts-example">Show dialog</vaadin-button>
+        <script>
+          window.addEventListener('WebComponentsReady', function() {
+            var dialog = document.querySelector('#parts-example');
+            document.querySelector('#show-parts-example').addEventListener('click', function() {
+              dialog.opened = true;
+            });
+            dialog.$.content.querySelector('#ok-button').addEventListener('click', function() {
+              dialog.opened = false;
+            });
+          });
+        </script>
+      </template>
+    </demo-snippet>
+
+    <h3>Positioning</h3>
+    <demo-snippet>
+      <template>
+        <vaadin-dialog id="positioning-example" close-on-outside-click>
+          <template>
+            <div part="title">
+              I can be anywhere 🙃
+            </div>
+            <div part="actions">
+              <vaadin-radio-button-group id="align" value="center">
+                <vaadin-radio-button value="left-top"></vaadin-radio-button>
+                <vaadin-radio-button value="center-top"></vaadin-radio-button>
+                <vaadin-radio-button value="right-top"></vaadin-radio-button>
+                <br>
+                <vaadin-radio-button value="left-middle"></vaadin-radio-button>
+                <vaadin-radio-button value="center-middle"></vaadin-radio-button>
+                <vaadin-radio-button value="right-middle"></vaadin-radio-button>
+                <br>
+                <vaadin-radio-button value="left-bottom"></vaadin-radio-button>
+                <vaadin-radio-button value="center-bottom"></vaadin-radio-button>
+                <vaadin-radio-button value="right-bottom"></vaadin-radio-button>
+                <br>
+              </vaadin-radio-button-group>
+            </div>
+          </template>
+        </vaadin-dialog>
+        <vaadin-button id="show-positioning-example">Show dialog</vaadin-button>
+        <script>
+          window.addEventListener('WebComponentsReady', function() {
+            var dialog = document.querySelector('#positioning-example');
+            var align = dialog.$.content.querySelector('#align');
+
+            document.querySelector('#show-positioning-example').addEventListener('click', function() {
+              dialog.opened = true;
+            });
+
+            align.addEventListener('change', function() {
+              [dialog.horizontalAlign, dialog.verticalAlign] = this.value.split('-');
+            });
+          });
+        </script>
       </template>
     </demo-snippet>
   </div>
