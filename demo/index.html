@@ -46,50 +46,6 @@
         </script>
       </template>
     </demo-snippet>
-
-    <h3>Positioning</h3>
-    <demo-snippet>
-      <template>
-        <vaadin-dialog id="positioning-example" close-on-outside-click>
-          <template>
-            <div part="title">
-              I can be anywhere 🙃
-            </div>
-            <div part="actions">
-              <vaadin-radio-button-group id="align" value="center">
-                <vaadin-radio-button value="left-top"></vaadin-radio-button>
-                <vaadin-radio-button value="center-top"></vaadin-radio-button>
-                <vaadin-radio-button value="right-top"></vaadin-radio-button>
-                <br>
-                <vaadin-radio-button value="left-middle"></vaadin-radio-button>
-                <vaadin-radio-button value="center-middle"></vaadin-radio-button>
-                <vaadin-radio-button value="right-middle"></vaadin-radio-button>
-                <br>
-                <vaadin-radio-button value="left-bottom"></vaadin-radio-button>
-                <vaadin-radio-button value="center-bottom"></vaadin-radio-button>
-                <vaadin-radio-button value="right-bottom"></vaadin-radio-button>
-                <br>
-              </vaadin-radio-button-group>
-            </div>
-          </template>
-        </vaadin-dialog>
-        <vaadin-button id="show-positioning-example">Show dialog</vaadin-button>
-        <script>
-          window.addEventListener('WebComponentsReady', function() {
-            var dialog = document.querySelector('#positioning-example');
-            var align = dialog.$.content.querySelector('#align');
-
-            document.querySelector('#show-positioning-example').addEventListener('click', function() {
-              dialog.opened = true;
-            });
-
-            align.addEventListener('change', function() {
-              [dialog.horizontalAlign, dialog.verticalAlign] = this.value.split('-');
-            });
-          });
-        </script>
-      </template>
-    </demo-snippet>
   </div>
 </body>
 </html>

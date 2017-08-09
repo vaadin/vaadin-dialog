@@ -40,22 +40,6 @@ This program is available under Apache License Version 2.0, available at https:/
         height: 100vh;
       }
 
-      :host([horizontal-align="left"]) {
-        justify-content: flex-start;
-      }
-
-      :host([horizontal-align="right"]) {
-        justify-content: flex-end;
-      }
-
-      :host([vertical-align="top"]) {
-        align-items: flex-start;
-      }
-
-      :host([vertical-align="bottom"]) {
-        align-items: flex-end;
-      }
-
       [part="dialog"] {
         background: white;
         text-align: center;
@@ -124,23 +108,7 @@ This program is available under Apache License Version 2.0, available at https:/
             closeOnEsc: {
               type: Boolean,
               value: true
-            },
-
-            /**
-             * Horizontal alignment, possible values: `'left'`, `'center'`, `'right'`
-             */
-            horizontalAlign: {
-              type: String,
-              reflectToAttribute: true,
-            },
-
-            /**
-             * Vertical alignment, possible values: `'top'`, `'middle'`, `'bottom'`
-             */
-            verticalAlign: {
-              type: String,
-              reflectToAttribute: true,
-            },
+            }
           };
         }
 
