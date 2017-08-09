@@ -26,7 +26,7 @@
   "dependencies": {
     "polymer": "^2.0.0",
     "inert": "git://github.com/WICG/inert.git#^1.1.4",
-    "vaadin-overlay": "^1.0.0",
+    "vaadin-overlay": "^1.1.1",
     "vaadin-themable-mixin": "^1.0.0"
   },
   "devDependencies": {
