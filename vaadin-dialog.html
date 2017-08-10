@@ -5,53 +5,41 @@ This program is available under Apache License Version 2.0, available at https:/
 -->
 
 <link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../polymer/lib/mixins/gesture-event-listeners.html">
 <link rel="import" href="../vaadin-overlay/vaadin-overlay.html">
 <link rel="import" href="../vaadin-themable-mixin/vaadin-themable-mixin.html">
-<script src="../inert/dist/inert.min.js"></script>
 
-<dom-module id="vaadin-dialog-default-theme">
+<dom-module id="vaadin-dialog-styles" theme-for="vaadin-overlay">
   <template>
     <style>
-      [part="dialog"] {
-        padding: 24px;
-      }
-
-      [part="title"] {
-        font-size: 20px;
-        font-weight: bold;
-      }
-
-      [part="title"],
-      [part="content"] {
-        margin-bottom: 20px;
-      }
-    </style>
-  </template>
-</dom-module>
-
-<dom-module id="vaadin-dialog-template">
-  <template>
-    <style>
-      :host {
+      :host(.vaadin-dialog-overlay) {
         display: flex;
         align-items: center;
         justify-content: center;
         width: 100vw;
         height: 100vh;
       }
-
-      [part="dialog"] {
+      :host(.vaadin-dialog-overlay) [part="content"] {
         background: white;
-        text-align: center;
-        width: 500px;
-        max-width: 100%;
-        box-sizing: border-box;
+        padding: 5px;
+      }
+    </style>
+  </template>
+</dom-module>
+
+<dom-module id="vaadin-dialog">
+  <template>
+    <style>
+      :host {
+        display: block;
       }
     </style>
 
-    <slot name="title" part="title"></slot>
-    <slot name="content" part="content"></slot>
-    <slot name="actions" part="actions"></slot>
+    <vaadin-overlay id="overlay"
+      class="vaadin-dialog-overlay"
+      on-opened-changed="_onOverlayOpened"
+      with-backdrop>
+    </vaadin-overlay>
   </template>
   <script>
     if (!Polymer.Element) {
@@ -64,36 +52,32 @@ This program is available under Apache License Version 2.0, available at https:/
        *
        * ```html
        * <vaadin-dialog opened>
-       *   Sample dialog
+       *   <template>
+       *     Sample dialog
+       *   </template>
        * </vaadin-dialog>
        * ```
-       *
-       * ### Styling
-       *
-       * The following shadow DOM parts are exposed for styling:
-       *
-       * Part name         | Description
-       * ------------------|----------------
-       * `dialog`          | The dialog
-       * `title`           | The title block
-       * `content`         | The content block
-       * `actions`         | The actions block
-       * `backdrop`        | The backdrop
        *
        * @memberof Vaadin
        * @mixes Vaadin.ThemableMixin
        * @demo demo/index.html
        */
-
-      let memoizedTemplate;
-
-      class VaadinDialog extends Vaadin.ThemableMixin(Vaadin.OverlayElement) {
+      class VaadinDialog extends Vaadin.ThemableMixin(Polymer.GestureEventListeners(Polymer.Element)) {
         static get is() {
           return 'vaadin-dialog';
         }
 
         static get properties() {
           return {
+            /**
+             * True if the overlay is currently displayed.
+             */
+            opened: {
+              type: Boolean,
+              value: false,
+              notify: true
+            },
+
             /**
              * Set to true to enable closing dialog on outside click
              */
@@ -108,49 +92,60 @@ This program is available under Apache License Version 2.0, available at https:/
             closeOnEsc: {
               type: Boolean,
               value: true
-            }
+            },
+
+            _contentTemplate: Object
           };
         }
 
-        static get template() {
-          if (!memoizedTemplate) {
-            // Clone the superclass (vaadin-overlay) template
-            memoizedTemplate = super.template.cloneNode(true);
-
-            // Retrieve dialog's parts
-            const dialogTemplate = Polymer.DomModule.import(this.is + '-template', 'template');
-            const dialogSlots = dialogTemplate.content.querySelectorAll('slot');
-
-            // Append dialog's styles to the overlay's template
-            const styles = dialogTemplate.content.querySelector('style');
-            memoizedTemplate.content.appendChild(styles);
-
-            // Append dialog's parts to the overlay's template
-            const overlayContent = memoizedTemplate.content.querySelector('[part="content"]');
-            for (const slot of dialogSlots) {
-              overlayContent.appendChild(slot);
-            }
-
-            // Rename overlay's [part="content"] to [part="dialog"] for exposing
-            overlayContent.setAttribute('part', 'dialog');
-          }
-
-          return memoizedTemplate;
-        }
+        static get observers() {
+          return ['_openedChanged(opened)'];
+        }        
 
         ready() {
           super.ready();
-
-          this.setAttribute('role', 'dialog');
-          this.withBackdrop = true;
-
-          this.addEventListener('vaadin-overlay-outside-click', this._handleOutsideClick);
-          this.addEventListener('vaadin-overlay-escape-press', this._handleEscPress);
-
-          this.addEventListener('opened-changed', () => {
-            this._trapFocus();
-          });
+          this.$.overlay.setAttribute('role', 'dialog');
+          this.$.overlay.addEventListener('vaadin-overlay-outside-click', this._handleOutsideClick.bind(this));
+          this.$.overlay.addEventListener('vaadin-overlay-escape-press', this._handleEscPress.bind(this));
         }
+
+        _openedChanged(opened) {
+          if (opened && !this._instance) {
+            this._contentTemplate = Array.prototype.filter.call(this.children, el => {
+              return el.localName === 'template';
+            })[0];
+            const Templatizer = Polymer.Templatize.templatize(this._contentTemplate, this, {
+              instanceProps: {
+                detail: true,
+                target: true
+              },
+              forwardHostProp: function(prop, value) {
+                if (this._instance) {
+                  this._instance.forwardHostProp(prop, value);
+                }
+              }
+            });
+            this._instance = new Templatizer({});
+            this.$.overlay.content = this._instance.root;
+          }
+          this.$.overlay.opened = opened;
+        }
+
+        _onOverlayOpened(e) {
+          if (e.detail.value === true) {
+            // wait for a microtask before focusing the child element
+            // to allow overlay to position itself correctly first.
+            // Otherwise, the browser window will jump scroll.
+            Polymer.Async.microTask.run(() => {
+              const child = this.$.overlay.root.querySelector('#content :not(style):not(slot)');
+              if (child) {
+                child.focus();
+              }
+            });
+          } else if (e.detail.value === false) {
+            this.opened = false;
+          }
+        }             
 
         /**
          * Handle outside click and close the dialog if `closeOnOutsideClick` is true
@@ -168,17 +163,6 @@ This program is available under Apache License Version 2.0, available at https:/
           if (!this.closeOnEsc) {
             e.preventDefault();
           }
-        }
-
-        /**
-         * Trap/untrap focus within the dialog, https://youtu.be/JS68faEUduk?t=7m40s
-         */
-        _trapFocus() {
-          Array.from(document.body.children).forEach(child => {
-            if (child !== this) {
-              child.inert = this.opened;
-            }
-          });
         }
       }
 
