@@ -31,14 +31,16 @@
           </template>
         </dom-bind>
         <script>
-          var simpleDialogExample = document.querySelector('#simple-dialog-example');
-          simpleDialogExample.showSimpleDialog = function() {
-            simpleDialogExample.$.simpledialog.opened = true;
-          };          
+          window.addEventListener('WebComponentsReady', function() {
+            var simpleDialogExample = document.querySelector('#simple-dialog-example');
+            simpleDialogExample.showSimpleDialog = function() {
+              simpleDialogExample.$.simpledialog.opened = true;
+            };
+          });
         </script>
       </template>
-    </demo-snippet> 
-    
+    </demo-snippet>
+
     <h3>Another simple dialog</h3>
     <demo-snippet>
       <template>
@@ -54,13 +56,15 @@
           </template>
         </dom-bind>
         <script>
-          var anotherSimpleDialogExample = document.querySelector('#another-simple-dialog-example');
-          anotherSimpleDialogExample.showAnotherSimpleDialog = function() {
-            anotherSimpleDialogExample.$.anotherdialog.opened = true;
-          };          
+          window.addEventListener('WebComponentsReady', function() {
+            var anotherSimpleDialogExample = document.querySelector('#another-simple-dialog-example');
+            anotherSimpleDialogExample.showAnotherSimpleDialog = function() {
+              anotherSimpleDialogExample.$.anotherdialog.opened = true;
+            };
+          });
         </script>
       </template>
-    </demo-snippet>    
+    </demo-snippet>
 
     <h3>Close dialog with button</h3>
     <demo-snippet>
@@ -78,16 +82,18 @@
           </template>
         </dom-bind>
         <script>
-          var dialogExample = document.querySelector('#dialog-example');
-          dialogExample.openDialog = function() {
-            dialogExample.$.dialog.opened = true;
-          };
-          dialogExample.closeDialog = function() {
-            dialogExample.$.dialog.opened = false;
-          };                    
+          window.addEventListener('WebComponentsReady', function() {
+            var dialogExample = document.querySelector('#dialog-example');
+            dialogExample.openDialog = function() {
+              dialogExample.$.dialog.opened = true;
+            };
+            dialogExample.closeDialog = function() {
+              dialogExample.$.dialog.opened = false;
+            };
+          });
         </script>
       </template>
-    </demo-snippet>    
+    </demo-snippet>
   </div>
 </body>
 
