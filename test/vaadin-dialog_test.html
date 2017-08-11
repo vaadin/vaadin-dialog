@@ -12,22 +12,25 @@
   <test-fixture id="default">
     <template>
       <vaadin-dialog opened>
-        dialog
+        <template>
+          <div>Simple dialog</div>  
+        </template>        
       </vaadin-dialog>
     </template>
   </test-fixture>
 
   <script>
     describe('vaadin-dialog', function() {
-      var dialog, backdrop;
+      var dialog, backdrop, overlay;
 
       beforeEach(function() {
         dialog = fixture('default');
-        backdrop = dialog.$.backdrop;
+        overlay = dialog.$.overlay;
+        backdrop = overlay.$.backdrop;
       });
 
-      it('host should have the `dialog` role', () => {
-        expect(dialog.getAttribute('role')).to.be.eql('dialog');
+      it('overlay should have the `dialog` role', () => {
+        expect(overlay.getAttribute('role')).to.be.eql('dialog');
       });
 
       it('should close itself on ESC press', function() {
