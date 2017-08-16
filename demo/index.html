@@ -73,9 +73,10 @@
           <template>
             <vaadin-dialog id="dialog">
               <template>
-                <div>Press button to close</div>
+                <div>Press any button to close</div>
                 <br>
-                <vaadin-button on-click="closeDialog">Close</vaadin-button>
+                <vaadin-button on-click="closeDialog">Ok</vaadin-button>
+                <vaadin-button on-click="closeDialog">Cancel</vaadin-button>
               </template>
             </vaadin-dialog>
             <vaadin-button on-click="openDialog">Show dialog</vaadin-button>
