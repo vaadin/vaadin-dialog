@@ -33,27 +33,27 @@
         expect(overlay.getAttribute('role')).to.be.eql('dialog');
       });
 
-      describe('close-on-esc', () => {
+      describe('no-close-on-esc', () => {
         it('should close itself on ESC press by default', () => {
           MockInteractions.pressAndReleaseKeyOn(document.body, 27);
           expect(dialog.opened).to.eql(false);
         });
 
-        it('should not close itself on ESC press when close-on-esc is false', () => {
-          dialog.closeOnEsc = false;
+        it('should not close itself on ESC press when no-close-on-esc is true', () => {
+          dialog.noCloseOnEsc = true;
           MockInteractions.pressAndReleaseKeyOn(document.body, 27);
           expect(dialog.opened).to.eql(true);
         });
       });
 
-      describe('close-on-outside-click', () => {
+      describe('no-close-on-outside-click', () => {
         it('should close itself on outside click by default', () => {
           backdrop.dispatchEvent(new CustomEvent('click', {bubbles: true, composed: true}));
           expect(dialog.opened).to.eql(false);
         });
 
-        it('should not close itself on outside click when close-on-outside-click is false', () => {
-          dialog.closeOnOutsideClick = false;
+        it('should not close itself on outside click when no-close-on-outside-click is true', () => {
+          dialog.noCloseOnOutsideClick = true;
           backdrop.dispatchEvent(new CustomEvent('click', {bubbles: true, composed: true}));
           expect(dialog.opened).to.eql(true);
         });
