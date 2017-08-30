@@ -666,9 +666,9 @@
               "defaultValue": "false"
             },
             {
-              "name": "closeOnOutsideClick",
+              "name": "noCloseOnOutsideClick",
               "type": "boolean",
-              "description": "Set to false to disable closing dialog on outside click",
+              "description": "Set to true to disable closing dialog on outside click",
               "privacy": "public",
               "sourceRange": {
                 "start": {
@@ -683,12 +683,12 @@
               "metadata": {
                 "polymer": {}
               },
-              "defaultValue": "true"
+              "defaultValue": "false"
             },
             {
-              "name": "closeOnEsc",
+              "name": "noCloseOnEsc",
               "type": "boolean",
-              "description": "Set to false to disable closing dialog on Escape press",
+              "description": "Set to true to disable closing dialog on Escape press",
               "privacy": "public",
               "sourceRange": {
                 "start": {
@@ -703,7 +703,7 @@
               "metadata": {
                 "polymer": {}
               },
-              "defaultValue": "true"
+              "defaultValue": "false"
             },
             {
               "name": "_contentTemplate",
@@ -2669,7 +2669,7 @@
             },
             {
               "name": "_handleOutsideClick",
-              "description": "Handle outside click and close the dialog if `closeOnOutsideClick` is true",
+              "description": "Close the dialog if `noCloseOnOutsideClick` isn't set to true",
               "privacy": "protected",
               "sourceRange": {
                 "start": {
@@ -2690,7 +2690,7 @@
             },
             {
               "name": "_handleEscPress",
-              "description": "Handle ESC press and close the dialog if `closeOnEsc` is true",
+              "description": "Close the dialog if `noCloseOnEsc` isn't set to true",
               "privacy": "protected",
               "sourceRange": {
                 "start": {
@@ -3444,8 +3444,8 @@
               "type": "boolean"
             },
             {
-              "name": "close-on-outside-click",
-              "description": "Set to false to disable closing dialog on outside click",
+              "name": "no-close-on-outside-click",
+              "description": "Set to true to disable closing dialog on outside click",
               "sourceRange": {
                 "start": {
                   "line": 100,
@@ -3460,8 +3460,8 @@
               "type": "boolean"
             },
             {
-              "name": "close-on-esc",
-              "description": "Set to false to disable closing dialog on Escape press",
+              "name": "no-close-on-esc",
+              "description": "Set to true to disable closing dialog on Escape press",
               "sourceRange": {
                 "start": {
                   "line": 108,
@@ -3654,6 +3654,27 @@
             "polymer": {}
           },
           "inheritedFrom": "Vaadin.OverlayElement"
+        },
+        {
+          "name": "_boundIronOverlayCanceledListener",
+          "type": "Object",
+          "description": "",
+          "privacy": "protected",
+          "sourceRange": {
+            "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
+            "start": {
+              "line": 118,
+              "column": 10
+            },
+            "end": {
+              "line": 120,
+              "column": 11
+            }
+          },
+          "metadata": {
+            "polymer": {}
+          },
+          "inheritedFrom": "Vaadin.OverlayElement"
         }
       ],
       "methods": [
@@ -3664,11 +3685,11 @@
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 134,
+              "line": 144,
               "column": 6
             },
             "end": {
-              "line": 138,
+              "line": 148,
               "column": 7
             }
           },
@@ -3683,11 +3704,11 @@
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 140,
+              "line": 150,
               "column": 6
             },
             "end": {
-              "line": 142,
+              "line": 152,
               "column": 7
             }
           },
@@ -3706,11 +3727,11 @@
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 148,
+              "line": 158,
               "column": 6
             },
             "end": {
-              "line": 154,
+              "line": 164,
               "column": 7
             }
           },
@@ -3723,17 +3744,55 @@
           "inheritedFrom": "Vaadin.OverlayElement"
         },
         {
+          "name": "connectedCallback",
+          "description": "",
+          "privacy": "public",
+          "sourceRange": {
+            "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
+            "start": {
+              "line": 166,
+              "column": 6
+            },
+            "end": {
+              "line": 172,
+              "column": 7
+            }
+          },
+          "metadata": {},
+          "params": [],
+          "inheritedFrom": "Vaadin.OverlayElement"
+        },
+        {
+          "name": "disconnectedCallback",
+          "description": "",
+          "privacy": "public",
+          "sourceRange": {
+            "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
+            "start": {
+              "line": 174,
+              "column": 6
+            },
+            "end": {
+              "line": 188,
+              "column": 7
+            }
+          },
+          "metadata": {},
+          "params": [],
+          "inheritedFrom": "Vaadin.OverlayElement"
+        },
+        {
           "name": "_outsideClickListener",
           "description": "We need to listen on 'click' / 'tap' event and capture it and close the overlay before\npropagating the event to the listener in the button. Otherwise, if the clicked button would call\nopen(), this would happen: https://www.youtube.com/watch?v=Z86V_ICUCD4",
           "privacy": "protected",
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 164,
+              "line": 198,
               "column": 6
             },
             "end": {
-              "line": 175,
+              "line": 209,
               "column": 7
             }
           },
@@ -3752,11 +3811,11 @@
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 181,
+              "line": 215,
               "column": 6
             },
             "end": {
-              "line": 207,
+              "line": 241,
               "column": 7
             }
           },
@@ -3775,11 +3834,11 @@
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 213,
+              "line": 247,
               "column": 6
             },
             "end": {
-              "line": 247,
+              "line": 281,
               "column": 7
             }
           },
@@ -3798,11 +3857,11 @@
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 249,
+              "line": 283,
               "column": 6
             },
             "end": {
-              "line": 260,
+              "line": 294,
               "column": 7
             }
           },
@@ -3821,11 +3880,11 @@
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 262,
+              "line": 296,
               "column": 6
             },
             "end": {
-              "line": 264,
+              "line": 298,
               "column": 7
             }
           },
@@ -3844,11 +3903,11 @@
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 266,
+              "line": 300,
               "column": 6
             },
             "end": {
-              "line": 293,
+              "line": 327,
               "column": 7
             }
           },
@@ -3870,11 +3929,11 @@
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 296,
+              "line": 330,
               "column": 6
             },
             "end": {
-              "line": 298,
+              "line": 332,
               "column": 7
             }
           },
@@ -3893,11 +3952,11 @@
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 300,
+              "line": 334,
               "column": 6
             },
             "end": {
-              "line": 308,
+              "line": 358,
               "column": 7
             }
           },
@@ -3912,11 +3971,11 @@
           "sourceRange": {
             "file": "bower_components/vaadin-overlay/vaadin-overlay.html",
             "start": {
-              "line": 310,
+              "line": 360,
               "column": 6
             },
             "end": {
-              "line": 314,
+              "line": 364,
               "column": 7
             }
           },
