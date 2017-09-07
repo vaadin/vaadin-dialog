@@ -17,12 +17,12 @@
 
     <demo-navigation></demo-navigation>
 
-    <h3>Simple Dialog</h3>
+    <h3>Using Two-Way Binding for Toggling the Dialog</h3>
     <demo-snippet>
       <template>
-        <dom-bind id="simple-dialog-example">
+        <dom-module id="toggle-dialog">
           <template>
-            <vaadin-dialog id="simpledialog">
+            <vaadin-dialog opened="{{dialogOpened}}">
               <template>
                 <div>This simple dialog will close by pressing the Esc key,</div>
                 <div> or by a mouse click anywhere outside the dialog area</div>
@@ -30,15 +30,25 @@
             </vaadin-dialog>
             <vaadin-button on-click="showSimpleDialog">Show dialog</vaadin-button>
           </template>
-        </dom-bind>
+        </dom-module>
+
         <script>
           window.addEventListener('WebComponentsReady', function() {
-            var simpleDialogExample = document.querySelector('#simple-dialog-example');
-            simpleDialogExample.showSimpleDialog = function() {
-              simpleDialogExample.$.simpledialog.opened = true;
-            };
+            class toggleDialog extends Polymer.Element {
+              static get is() {
+                return 'toggle-dialog';
+              }
+
+              showSimpleDialog() {
+                this.dialogOpened = true;
+              }
+            }
+
+            window.customElements.define(toggleDialog.is, toggleDialog);
           });
         </script>
+
+        <toggle-dialog></toggle-dialog>
       </template>
     </demo-snippet>
 
