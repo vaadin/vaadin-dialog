@@ -68,7 +68,9 @@
   </template>
   <script>
     class DialogBasicDemos extends DemoReadyEventEmitter(DialogDemo(Polymer.Element)) {
-      static get is() { return 'dialog-basic-demos'; }
+      static get is() {
+        return 'dialog-basic-demos';
+      }
     }
     customElements.define(DialogBasicDemos.is, DialogBasicDemos);
   </script>
