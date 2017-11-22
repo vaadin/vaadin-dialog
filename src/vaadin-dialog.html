@@ -106,6 +106,13 @@ This program is available under Apache License Version 2.0, available at https:/
               value: false
             },
 
+            /**
+             * Theme to apply to the overlay element
+             */
+            theme: {
+              observer: '_themeChanged'
+            },
+
             _contentTemplate: Object
           };
         }
@@ -119,6 +126,10 @@ This program is available under Apache License Version 2.0, available at https:/
           this.$.overlay.setAttribute('role', 'dialog');
           this.$.overlay.addEventListener('vaadin-overlay-outside-click', this._handleOutsideClick.bind(this));
           this.$.overlay.addEventListener('vaadin-overlay-escape-press', this._handleEscPress.bind(this));
+        }
+
+        _themeChanged(position) {
+          this.$.overlay.setAttribute('theme', position);
         }
 
         _openedChanged(opened) {
