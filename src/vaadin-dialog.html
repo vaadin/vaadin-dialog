@@ -71,7 +71,7 @@ This program is available under Apache License Version 2.0, available at https:/
        * @mixes Vaadin.ElementMixin
        * @demo demo/index.html
        */
-      class VaadinDialog extends Vaadin.ElementMixin(Polymer.Element) {
+      class VaadinDialogElement extends Vaadin.ElementMixin(Polymer.Element) {
         static get is() {
           return 'vaadin-dialog';
         }
@@ -172,11 +172,11 @@ This program is available under Apache License Version 2.0, available at https:/
         }
       }
 
-      customElements.define(VaadinDialog.is, VaadinDialog);
+      customElements.define(VaadinDialogElement.is, VaadinDialogElement);
       /**
        * @namespace Vaadin
        */
-      window.Vaadin.VaadinDialog = VaadinDialog;
+      window.Vaadin.VaadinDialogElement = VaadinDialogElement;
     })();
   </script>
 </dom-module>
