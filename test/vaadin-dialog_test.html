@@ -61,6 +61,16 @@
     </template>
   </test-fixture>
 
+  <test-fixture id="renderer-function">
+    <template>
+      <vaadin-dialog>
+        <template>
+          <div>Renderer Function</div>
+        </template>
+      </vaadin-dialog>
+    </template>
+  </test-fixture>
+
   <script>
     describe('vaadin-dialog', () => {
       var dialog, backdrop, overlay;
@@ -135,14 +145,55 @@
 
       it('dialog should bind parent property', () => {
         container.message = 'foo';
-        expect(overlay.$.content.shadowRoot.querySelector('span').textContent.trim()).to.equal('foo');
+        expect(overlay.content.querySelector('span').textContent.trim()).to.equal('foo');
       });
 
       it('dialog should support two-way data binding', () => {
-        const input = overlay.$.content.shadowRoot.querySelector('input');
+        const input = overlay.content.querySelector('input');
         input.value = 'bar';
         input.dispatchEvent(new CustomEvent('input'));
         expect(container.text).to.equal('bar');
+      });
+    });
+
+    describe('renderer function', () => {
+      let dialog, overlay;
+
+      beforeEach(() => {
+        dialog = fixture('renderer-function');
+        overlay = dialog.$.overlay;
+      });
+
+      it('should default to template if renderer function not provided', () => {
+        dialog.opened = true;
+
+        expect(overlay.content.querySelector('div').textContent).to.include('Renderer Function');
+      });
+
+      it('should render the content of renderer function instead of template content when renderer function provided', () => {
+        overlay.renderer = (root, model, dialog) => {
+          const div = document.createElement('div');
+          div.textContent = 'The content of this overlay was generated with renderer';
+          root.appendChild(div);
+        };
+        dialog.opened = true;
+
+        expect(overlay.content.querySelector('div').textContent).to.include('The content of this overlay was generated with renderer');
+      });
+
+      it('should fall back to template when renderer function is removed', () => {
+        dialog.renderer = (root, model, dialog) => {
+          const div = document.createElement('div');
+          div.textContent = 'The content of this overlay was generated with renderer';
+          root.appendChild(div);
+        };
+        dialog.opened = true;
+
+        expect(overlay.content.querySelector('div').textContent).to.include('The content of this overlay was generated with renderer');
+
+        overlay.renderer = null;
+
+        expect(overlay.content.querySelector('div').textContent).to.include('Renderer Function');
       });
     });
   </script>

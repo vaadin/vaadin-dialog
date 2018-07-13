@@ -122,12 +122,21 @@ This program is available under Apache License Version 2.0, available at https:/
               value: false
             },
 
-            _contentTemplate: Object
+            /**
+            * Custom function for rendering the content of the overlay
+            */
+            renderer: Function,
+
+            _contentTemplate: Object,
+
           };
         }
 
         static get observers() {
-          return ['_openedChanged(opened)'];
+          return [
+            '_openedChanged(opened)',
+            '_rendererChanged(renderer)'
+          ];
         }
 
         ready() {
@@ -171,6 +180,11 @@ This program is available under Apache License Version 2.0, available at https:/
           if (this.noCloseOnEsc) {
             e.preventDefault();
           }
+        }
+
+        _rendererChanged(renderer) {
+          this.$.overlay.owner = this;
+          this.$.overlay.renderer = renderer;
         }
       }
 
