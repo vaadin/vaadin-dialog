@@ -47,6 +47,16 @@
 
         expect(overlay.textContent).to.include('The content of the dialog');
       });
+
+      it('should remove template when added after renderer', () => {
+        dialog.renderer = () => {};
+        const template = document.createElement('template');
+        expect(() => {
+          dialog.appendChild(template);
+          dialog._observer.flush();
+        }).to.throw(Error);
+        expect(dialog._contentTemplate).to.be.not.ok;
+      });
     });
 
     describe('renderer function with template', () => {
@@ -62,30 +72,15 @@
         expect(overlay.textContent).to.include('Template content');
       });
 
-      it('should render the content of renderer function instead of template content when renderer function provided', () => {
-        dialog.renderer = (root, dialog) => {
-          const div = document.createElement('div');
-          div.textContent = 'The content of the dialog';
-          root.appendChild(div);
-        };
-        dialog.opened = true;
-
-        expect(overlay.textContent).to.include('The content of the dialog');
+      it('should throw an error when setting a renderer if there is already a template', () => {
+        dialog._observer.flush();
+        expect(() => dialog.renderer = () => {}).to.throw(Error);
       });
 
-      it('should fall back to template when renderer function is removed', () => {
-        dialog.renderer = (root, dialog) => {
-          const div = document.createElement('div');
-          div.textContent = 'The content of the dialog';
-          root.appendChild(div);
-        };
-        dialog.opened = true;
-
-        expect(overlay.textContent).to.include('The content of the dialog');
-
-        dialog.renderer = null;
-
-        expect(overlay.textContent).to.include('Template content');
+      it('should remove renderer when added after template', () => {
+        dialog._observer.flush();
+        expect(() => dialog.renderer = () => {}).to.throw(Error);
+        expect(dialog.renderer).to.be.not.ok;
       });
     });
   </script>
