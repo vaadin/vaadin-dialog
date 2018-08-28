@@ -215,11 +215,7 @@ This program is available under Apache License Version 2.0, available at https:/
          * Manually invoke existing renderer.
          */
         render() {
-          if (!this.renderer) {
-            return;
-          }
-
-          this.$.overlay && this.$.overlay.render();
+          this.$.overlay.render();
         }
 
         _templateOrRendererChanged(template, renderer) {
