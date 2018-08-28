@@ -57,6 +57,12 @@
         }).to.throw(Error);
         expect(dialog._contentTemplate).to.be.not.ok;
       });
+
+      it('should be possible to manually invoke renderer', () => {
+        dialog.renderer = sinon.spy();
+        dialog.render();
+        expect(dialog.renderer.calledTwice).to.be.true;
+      });
     });
 
     describe('renderer function with template', () => {
