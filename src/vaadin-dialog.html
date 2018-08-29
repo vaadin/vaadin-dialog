@@ -219,10 +219,6 @@ This program is available under Apache License Version 2.0, available at https:/
 
           this._oldTemplate = template;
           this._oldRenderer = renderer;
-
-          if (renderer) {
-            this.$.overlay.setProperties({owner: this, renderer: renderer});
-          }
         }
 
         disconnectedCallback() {
@@ -232,6 +228,7 @@ This program is available under Apache License Version 2.0, available at https:/
 
         _openedChanged(opened) {
           if (opened) {
+            this.$.overlay.setProperties({owner: this, renderer: this.renderer});
             this.$.overlay.template = this.querySelector('template');
           }
           this.$.overlay.opened = opened;
