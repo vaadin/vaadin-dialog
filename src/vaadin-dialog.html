@@ -21,6 +21,36 @@ This program is available under Apache License Version 2.0, available at https:/
       [part="content"] {
         min-width: 12em; /* matches the default <vaadin-text-field> width */
       }
+
+      .resizer {
+        position: absolute;
+        height: 10px;
+        width: 10px;
+      }
+
+      .resizer.nw {
+        top: 0;
+        left: 0;
+        cursor: nw-resize;
+      }
+
+      .resizer.ne {
+        top: 0;
+        right: 0;
+        cursor: ne-resize;
+      }
+
+      .resizer.se {
+        bottom: 0;
+        right: 0;
+        cursor: se-resize;
+      }
+
+      .resizer.sw {
+        bottom: 0;
+        left: 0;
+        cursor: sw-resize;
+      }
     </style>
   </template>
 </dom-module>
@@ -188,6 +218,27 @@ This program is available under Apache License Version 2.0, available at https:/
              */
             renderer: Function,
 
+            modeless: {
+              type: Boolean,
+              value: false,
+              observer: '_modelessChanged'
+            },
+
+            draggable: {
+              type: Boolean,
+              value: false,
+              observer: '_draggableChanged'
+            },
+
+            /**
+             * Set to true to enable resizing the dialog by dragging the corners.
+             */
+            resizable: {
+              type: Boolean,
+              value: false,
+              observer: '_resizableChanged'
+            },
+
             _oldTemplate: Object,
 
             _oldRenderer: Object
@@ -269,6 +320,8 @@ This program is available under Apache License Version 2.0, available at https:/
         _onOverlayOpened(e) {
           if (e.detail.value === false) {
             this.opened = false;
+          } else if (this.resizable) {
+            this._snapToPixels();
           }
         }
 
@@ -287,6 +340,177 @@ This program is available under Apache License Version 2.0, available at https:/
         _handleEscPress(e) {
           if (this.noCloseOnEsc) {
             e.preventDefault();
+          }
+        }
+
+        _modelessChanged(modeless) {
+          this.$.overlay.modeless = modeless;
+          this.$.overlay.$.backdrop.style.display = modeless ? 'none' : 'block';
+        }
+
+        _draggableChanged() {
+          const overlay = this.$.overlay.$.overlay;
+          const pos = {x: 0, y: 0, dx: 0, dy: 0};
+          const stopDrag = () => {
+            window.removeEventListener('mouseup', stopDrag);
+            window.removeEventListener('mousemove', drag);
+          };
+          const drag = (e) => {
+            e.preventDefault();
+            pos.dx = pos.x - e.clientX;
+            pos.dy = pos.y - e.clientY;
+            pos.x = e.clientX;
+            pos.y = e.clientY;
+            const top = overlay.offsetTop - pos.dy;
+            const left = overlay.offsetLeft - pos.dx;
+            const bottom = window.innerHeight - overlay.clientHeight;
+            const right = window.innerWidth - overlay.clientWidth;
+            this._setBounds({
+              top: `${top < 0 ? 0 : top > bottom ? bottom : top}px`,
+              right: 'unset',
+              bottom: 'unset',
+              left: `${left < 0 ? 0 : left > right ? right : left}px`
+            });
+          };
+          const startDrag = (e) => {
+            e.preventDefault();
+            pos.x = e.clientX;
+            pos.y = e.clientY;
+            window.addEventListener('mouseup', stopDrag);
+            window.addEventListener('mousemove', drag);
+          };
+          overlay.addEventListener('mousedown', startDrag);
+          window.addEventListener('mouseout', e => {
+            const target = e.relatedTarget || e.toElement;
+            if (!target || target.nodeName === 'HTML') {
+              stopDrag(e);
+            }
+          });
+        }
+
+        _resizableChanged(resizable) {
+          if (resizable) {
+            const overlay = this.$.overlay.$.overlay;
+            const resize = (e, corner) => {
+              const minimumSize = 40;
+              switch (corner) {
+                case 'se': {
+                  const width = originalWidth + (e.pageX - originalMouseX);
+                  const height = originalHeight + (e.pageY - originalMouseY);
+                  if (width > minimumSize) {
+                    overlay.style.width = `${width}px`;
+                  }
+                  if (height > minimumSize) {
+                    overlay.style.height = `${height}px`;
+                  }
+                  break;
+                }
+                case 'sw': {
+                  const width = originalWidth - (e.pageX - originalMouseX);
+                  const height = originalHeight + (e.pageY - originalMouseY);
+                  if (width > minimumSize) {
+                    overlay.style.width = `${width}px`;
+                    this._setBounds({left: `${originalX + (e.pageX - originalMouseX)}px`});
+                  }
+                  if (height > minimumSize) {
+                    overlay.style.height = `${height}px`;
+                  }
+                  break;
+                }
+                case 'ne': {
+                  const width = originalWidth + (e.pageX - originalMouseX);
+                  const height = originalHeight - (e.pageY - originalMouseY);
+                  if (width > minimumSize) {
+                    overlay.style.width = `${width}px`;
+                  }
+                  if (height > minimumSize) {
+                    overlay.style.height = `${height}px`;
+                    this._setBounds({top: `${originalY + (e.pageY - originalMouseY)}px`});
+                  }
+                  break;
+                }
+                case 'nw': {
+                  const width = originalWidth - (e.pageX - originalMouseX);
+                  const height = originalHeight - (e.pageY - originalMouseY);
+                  if (width > minimumSize) {
+                    overlay.style.width = `${width}px`;
+                    this._setBounds({left: `${originalX + (e.pageX - originalMouseX)}px`});
+                  }
+                  if (height > minimumSize) {
+                    overlay.style.height = `${height}px`;
+                    this._setBounds({top: `${originalY + (e.pageY - originalMouseY)}px`});
+                  }
+                  break;
+                }
+              }
+            };
+            const stopResize = corner => window.removeEventListener('mousemove', resizeEvents[corner]);
+            const resizeEvents = {};
+            const stopResizeEvents = {};
+
+            let originalWidth;
+            let originalHeight;
+            let originalX;
+            let originalY;
+            let originalMouseX;
+            let originalMouseY;
+
+            ['nw', 'ne', 'se', 'sw'].forEach(corner => {
+              const resizer = document.createElement('div');
+              resizer.classList.add('resizer', corner);
+              resizer.addEventListener('mousedown', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                const bounds = overlay.getBoundingClientRect();
+                const offset = (window.innerHeight - this.$.overlay.clientHeight) / 2;
+                originalWidth = bounds.width;
+                originalHeight = bounds.height;
+                originalX = bounds.left - offset;
+                originalY = bounds.top - offset;
+                originalMouseX = e.pageX;
+                originalMouseY = e.pageY;
+                resizeEvents[corner] = e => resize(e, corner);
+                stopResizeEvents[corner] = () => stopResize(corner);
+                window.addEventListener('mousemove', resizeEvents[corner]);
+                window.addEventListener('mouseup', stopResizeEvents[corner]);
+              });
+
+              overlay.appendChild(resizer);
+            });
+          }
+        }
+
+        _setBounds({top, right, bottom, left}) {
+          const overlay = this.$.overlay.$.overlay;
+          if (typeof arguments[0] !== 'object') {
+            top = arguments[0];
+            right = arguments[1];
+            bottom = arguments[2];
+            left = arguments[3];
+          }
+          if (top) {
+            overlay.style.top = top;
+          }
+          if (right) {
+            overlay.style.right = right;
+          }
+          if (bottom) {
+            overlay.style.bottom = bottom;
+          }
+          if (left) {
+            overlay.style.left = left;
+          }
+        }
+
+        _snapToPixels() {
+          const overlay = this.$.overlay.$.overlay;
+          if (overlay.style.position !== 'absolute') {
+            overlay.style.position = 'absolute';
+            const container = this.$.overlay;
+            const offset = window.innerHeight - container.clientHeight; // idk why I need this offset ¯\_(ツ)_/¯
+            const top = `${(container.clientHeight - overlay.clientHeight) / 2 - offset}px`;
+            const left = `${(container.clientWidth - overlay.clientWidth) / 2}px`;
+            this._setBounds({top, left});
           }
         }
       }
