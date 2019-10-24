@@ -222,6 +222,25 @@
       </template>
     </vaadin-demo-snippet>
 
+    <h3>Modeless Draggable Resizable Dialog</h3>
+    <vaadin-demo-snippet id="dialog-basic-demos-modeless-draggable-resizable-dialog" when-defined="vaadin-dialog">
+      <template preserve-content>
+        <vaadin-dialog modeless draggable resizable></vaadin-dialog>
+        <vaadin-button>Toggle dialog</vaadin-button>
+        <script>
+          window.addDemoReadyListener('#dialog-basic-demos-modeless-draggable-resizable-dialog', function(document) {
+            const dialog = document.querySelector('vaadin-dialog');
+            dialog.renderer = function(root, dialog) {
+              root.textContent = 'This simple dialog will close by pressing the Esc key, or by a mouse click anywhere outside the dialog area';
+            };
+            document.querySelector('vaadin-button').addEventListener('click', function() {
+              dialog.opened = !dialog.opened;
+            });
+          });
+        </script>
+      </template>
+    </vaadin-demo-snippet>
+    
   </template>
   <script>
     class DialogBasicDemos extends DemoReadyEventEmitter(DialogDemo(Polymer.Element)) {
