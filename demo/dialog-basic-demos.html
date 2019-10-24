@@ -222,19 +222,22 @@
       </template>
     </vaadin-demo-snippet>
 
-    <h3>Modeless Draggable Resizable Dialog</h3>
+    <h3>Modeless Draggable Resizable Dialogs</h3>
     <vaadin-demo-snippet id="dialog-basic-demos-modeless-draggable-resizable-dialog" when-defined="vaadin-dialog">
       <template preserve-content>
         <vaadin-dialog modeless draggable resizable></vaadin-dialog>
-        <vaadin-button>Toggle dialog</vaadin-button>
+        <vaadin-dialog modeless draggable resizable></vaadin-dialog>
+        <vaadin-button>Toggle dialog 1</vaadin-button>
+        <vaadin-button>Toggle dialog 2</vaadin-button>
         <script>
           window.addDemoReadyListener('#dialog-basic-demos-modeless-draggable-resizable-dialog', function(document) {
-            const dialog = document.querySelector('vaadin-dialog');
-            dialog.renderer = function(root, dialog) {
-              root.textContent = 'This simple dialog will close by pressing the Esc key, or by a mouse click anywhere outside the dialog area';
-            };
-            document.querySelector('vaadin-button').addEventListener('click', function() {
-              dialog.opened = !dialog.opened;
+            Array.from(document.querySelectorAll('vaadin-dialog')).forEach((dialog, i) => {
+              dialog.renderer = function(root, dialog) {
+                root.textContent = `Dialog ${i + 1}: Drag me around and resize me!`;
+              };
+              document.querySelectorAll('vaadin-button')[i].addEventListener('click', function() {
+                dialog.opened = !dialog.opened;
+              });
             });
           });
         </script>

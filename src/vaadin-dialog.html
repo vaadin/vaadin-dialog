@@ -410,6 +410,7 @@ This program is available under Apache License Version 2.0, available at https:/
             });
           };
           const startDrag = (e) => {
+            this._moveOverlayToTop();
             const target = e.relatedTarget || e.toElement;
             if (target.matches('[part="overlay"]') || target.matches('[part="content"]')) {
               e.preventDefault();
@@ -484,6 +485,7 @@ This program is available under Apache License Version 2.0, available at https:/
               resizer.addEventListener('mousedown', e => {
                 e.preventDefault();
                 e.stopPropagation();
+                this._moveOverlayToTop();
                 const bounds = overlay.getBoundingClientRect();
                 const offset = (window.innerHeight - this.$.overlay.clientHeight) / 2;
                 originalWidth = bounds.width;
@@ -527,16 +529,21 @@ This program is available under Apache License Version 2.0, available at https:/
         _snapToPixels() {
           const overlay = this.$.overlay.$.overlay;
           if (overlay.style.position !== 'absolute') {
+            const bounds = overlay.getBoundingClientRect();
             overlay.style.position = 'absolute';
             overlay.style.maxWidth = 'unset';
-            overlay.style.width = `${overlay.clientWidth}px`;
-            overlay.style.height = `${overlay.clientHeight}px`;
+            overlay.style.width = `${bounds.width}px`;
+            overlay.style.height = `${bounds.height}px`;
             const container = this.$.overlay;
             const offset = window.innerHeight - container.clientHeight; // idk why I need this offset ¯\_(ツ)_/¯
             const top = `${(container.clientHeight - overlay.clientHeight) / 2 - offset}px`;
             const left = `${(container.clientWidth - overlay.clientWidth) / 2}px`;
             this._setBounds({top, left});
           }
+        }
+
+        _moveOverlayToTop() {
+          document.body.appendChild(this.$.overlay);
         }
       }
 
