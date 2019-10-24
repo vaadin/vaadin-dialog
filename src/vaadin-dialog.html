@@ -22,16 +22,29 @@ This program is available under Apache License Version 2.0, available at https:/
         min-width: 12em; /* matches the default <vaadin-text-field> width */
       }
 
+      [part="overlay"] {
+        position: relative;
+      }
+
+      /* Resizers */
+
       .resizer {
         position: absolute;
         height: 10px;
         width: 10px;
       }
 
-      .resizer.nw {
+      .resizer.edge {
         top: 0;
+        right: 0;
+        bottom: 0;
         left: 0;
-        cursor: nw-resize;
+      }
+
+      .resizer.edge.n {
+        width: auto;
+        bottom: unset;
+        cursor: n-resize;
       }
 
       .resizer.ne {
@@ -40,16 +53,40 @@ This program is available under Apache License Version 2.0, available at https:/
         cursor: ne-resize;
       }
 
+      .resizer.edge.e {
+        height: auto;
+        left: unset;
+        cursor: e-resize;
+      }
+
       .resizer.se {
         bottom: 0;
         right: 0;
         cursor: se-resize;
       }
 
+      .resizer.edge.s {
+        width: auto;
+        top: unset;
+        cursor: s-resize;
+      }
+
       .resizer.sw {
         bottom: 0;
         left: 0;
         cursor: sw-resize;
+      }
+
+      .resizer.edge.w {
+        height: auto;
+        right: unset;
+        cursor: w-resize;
+      }
+
+      .resizer.nw {
+        top: 0;
+        left: 0;
+        cursor: nw-resize;
       }
     </style>
   </template>
@@ -320,8 +357,6 @@ This program is available under Apache License Version 2.0, available at https:/
         _onOverlayOpened(e) {
           if (e.detail.value === false) {
             this.opened = false;
-          } else if (this.resizable) {
-            this._snapToPixels();
           }
         }
 
@@ -356,28 +391,29 @@ This program is available under Apache License Version 2.0, available at https:/
             window.removeEventListener('mousemove', drag);
           };
           const drag = (e) => {
-            e.preventDefault();
+            this._snapToPixels();
             pos.dx = pos.x - e.clientX;
             pos.dy = pos.y - e.clientY;
             pos.x = e.clientX;
             pos.y = e.clientY;
             const top = overlay.offsetTop - pos.dy;
             const left = overlay.offsetLeft - pos.dx;
-            const bottom = window.innerHeight - overlay.clientHeight;
-            const right = window.innerWidth - overlay.clientWidth;
             this._setBounds({
-              top: `${top < 0 ? 0 : top > bottom ? bottom : top}px`,
+              top: `${top}px`,
               right: 'unset',
               bottom: 'unset',
-              left: `${left < 0 ? 0 : left > right ? right : left}px`
+              left: `${left}px`
             });
           };
           const startDrag = (e) => {
-            e.preventDefault();
-            pos.x = e.clientX;
-            pos.y = e.clientY;
-            window.addEventListener('mouseup', stopDrag);
-            window.addEventListener('mousemove', drag);
+            const target = e.relatedTarget || e.toElement;
+            if (target.matches('[part="overlay"]') || target.matches('[part="content"]')) {
+              e.preventDefault();
+              pos.x = e.clientX;
+              pos.y = e.clientY;
+              window.addEventListener('mouseup', stopDrag);
+              window.addEventListener('mousemove', drag);
+            }
           };
           overlay.addEventListener('mousedown', startDrag);
           window.addEventListener('mouseout', e => {
@@ -391,60 +427,45 @@ This program is available under Apache License Version 2.0, available at https:/
         _resizableChanged(resizable) {
           if (resizable) {
             const overlay = this.$.overlay.$.overlay;
-            const resize = (e, corner) => {
+            const resize = (e, edge) => {
+              this._snapToPixels();
               const minimumSize = 40;
-              switch (corner) {
-                case 'se': {
-                  const width = originalWidth + (e.pageX - originalMouseX);
-                  const height = originalHeight + (e.pageY - originalMouseY);
-                  if (width > minimumSize) {
-                    overlay.style.width = `${width}px`;
+              edge.split('').forEach(direction => {
+                switch (direction) {
+                  case 'n': {
+                    const height = originalHeight - (e.pageY - originalMouseY);
+                    if (height > minimumSize) {
+                      overlay.style.height = `${height}px`;
+                      this._setBounds({top: `${originalY + (e.pageY - originalMouseY)}px`});
+                    }
+                    break;
                   }
-                  if (height > minimumSize) {
-                    overlay.style.height = `${height}px`;
+                  case 'e': {
+                    const width = originalWidth + (e.pageX - originalMouseX);
+                    if (width > minimumSize) {
+                      overlay.style.width = `${width}px`;
+                    }
+                    break;
                   }
-                  break;
+                  case 's': {
+                    const height = originalHeight + (e.pageY - originalMouseY);
+                    if (height > minimumSize) {
+                      overlay.style.height = `${height}px`;
+                    }
+                    break;
+                  }
+                  case 'w': {
+                    const width = originalWidth - (e.pageX - originalMouseX);
+                    if (width > minimumSize) {
+                      overlay.style.width = `${width}px`;
+                      this._setBounds({left: `${originalX + (e.pageX - originalMouseX)}px`});
+                    }
+                    break;
+                  }
                 }
-                case 'sw': {
-                  const width = originalWidth - (e.pageX - originalMouseX);
-                  const height = originalHeight + (e.pageY - originalMouseY);
-                  if (width > minimumSize) {
-                    overlay.style.width = `${width}px`;
-                    this._setBounds({left: `${originalX + (e.pageX - originalMouseX)}px`});
-                  }
-                  if (height > minimumSize) {
-                    overlay.style.height = `${height}px`;
-                  }
-                  break;
-                }
-                case 'ne': {
-                  const width = originalWidth + (e.pageX - originalMouseX);
-                  const height = originalHeight - (e.pageY - originalMouseY);
-                  if (width > minimumSize) {
-                    overlay.style.width = `${width}px`;
-                  }
-                  if (height > minimumSize) {
-                    overlay.style.height = `${height}px`;
-                    this._setBounds({top: `${originalY + (e.pageY - originalMouseY)}px`});
-                  }
-                  break;
-                }
-                case 'nw': {
-                  const width = originalWidth - (e.pageX - originalMouseX);
-                  const height = originalHeight - (e.pageY - originalMouseY);
-                  if (width > minimumSize) {
-                    overlay.style.width = `${width}px`;
-                    this._setBounds({left: `${originalX + (e.pageX - originalMouseX)}px`});
-                  }
-                  if (height > minimumSize) {
-                    overlay.style.height = `${height}px`;
-                    this._setBounds({top: `${originalY + (e.pageY - originalMouseY)}px`});
-                  }
-                  break;
-                }
-              }
+              });
             };
-            const stopResize = corner => window.removeEventListener('mousemove', resizeEvents[corner]);
+            const stopResize = edge => window.removeEventListener('mousemove', resizeEvents[edge]);
             const resizeEvents = {};
             const stopResizeEvents = {};
 
@@ -455,9 +476,13 @@ This program is available under Apache License Version 2.0, available at https:/
             let originalMouseX;
             let originalMouseY;
 
-            ['nw', 'ne', 'se', 'sw'].forEach(corner => {
+            // Note: edge controls added before corners
+            ['n', 'e', 's', 'w', 'nw', 'ne', 'se', 'sw'].forEach(edge => {
               const resizer = document.createElement('div');
-              resizer.classList.add('resizer', corner);
+              if (edge.length === 1) {
+                resizer.classList.add('edge');
+              }
+              resizer.classList.add('resizer', edge);
               resizer.addEventListener('mousedown', e => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -469,12 +494,11 @@ This program is available under Apache License Version 2.0, available at https:/
                 originalY = bounds.top - offset;
                 originalMouseX = e.pageX;
                 originalMouseY = e.pageY;
-                resizeEvents[corner] = e => resize(e, corner);
-                stopResizeEvents[corner] = () => stopResize(corner);
-                window.addEventListener('mousemove', resizeEvents[corner]);
-                window.addEventListener('mouseup', stopResizeEvents[corner]);
+                resizeEvents[edge] = e => resize(e, edge);
+                stopResizeEvents[edge] = () => stopResize(edge);
+                window.addEventListener('mousemove', resizeEvents[edge]);
+                window.addEventListener('mouseup', stopResizeEvents[edge]);
               });
-
               overlay.appendChild(resizer);
             });
           }
@@ -506,6 +530,7 @@ This program is available under Apache License Version 2.0, available at https:/
           const overlay = this.$.overlay.$.overlay;
           if (overlay.style.position !== 'absolute') {
             overlay.style.position = 'absolute';
+            overlay.style.maxWidth = 'unset';
             const container = this.$.overlay;
             const offset = window.innerHeight - container.clientHeight; // idk why I need this offset ¯\_(ツ)_/¯
             const top = `${(container.clientHeight - overlay.clientHeight) / 2 - offset}px`;
