@@ -398,11 +398,15 @@ This program is available under Apache License Version 2.0, available at https:/
             pos.y = e.clientY;
             const top = overlay.offsetTop - pos.dy;
             const left = overlay.offsetLeft - pos.dx;
+            const bottomLimit = window.innerHeight - (overlay.clientHeight / 2);
+            const rightLimit = window.innerWidth - (overlay.clientWidth / 2);
+            const topLimit = -(overlay.clientHeight / 2);
+            const leftLimit = -(overlay.clientWidth / 2);
             this._setBounds({
-              top: `${top}px`,
+              top: `${top < topLimit ? topLimit : top > bottomLimit ? bottomLimit : top}px`,
               right: 'unset',
               bottom: 'unset',
-              left: `${left}px`
+              left: `${left < leftLimit ? leftLimit : left > rightLimit ? rightLimit : left}px`
             });
           };
           const startDrag = (e) => {
@@ -416,12 +420,6 @@ This program is available under Apache License Version 2.0, available at https:/
             }
           };
           overlay.addEventListener('mousedown', startDrag);
-          window.addEventListener('mouseout', e => {
-            const target = e.relatedTarget || e.toElement;
-            if (!target || target.nodeName === 'HTML') {
-              stopDrag(e);
-            }
-          });
         }
 
         _resizableChanged(resizable) {
@@ -531,6 +529,8 @@ This program is available under Apache License Version 2.0, available at https:/
           if (overlay.style.position !== 'absolute') {
             overlay.style.position = 'absolute';
             overlay.style.maxWidth = 'unset';
+            overlay.style.width = `${overlay.clientWidth}px`;
+            overlay.style.height = `${overlay.clientHeight}px`;
             const container = this.$.overlay;
             const offset = window.innerHeight - container.clientHeight; // idk why I need this offset ¯\_(ツ)_/¯
             const top = `${(container.clientHeight - overlay.clientHeight) / 2 - offset}px`;
