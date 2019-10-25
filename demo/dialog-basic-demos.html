@@ -231,7 +231,7 @@
         <vaadin-button>Toggle dialog 2</vaadin-button>
         <script>
           window.addDemoReadyListener('#dialog-basic-demos-modeless-draggable-resizable-dialog', function(document) {
-            Array.from(document.querySelectorAll('vaadin-dialog')).forEach((dialog, i) => {
+            Array.from(document.querySelectorAll('vaadin-dialog')).forEach(function(dialog, i) {
               dialog.renderer = function(root, dialog) {
                 root.textContent = `Dialog ${i + 1}: Drag me around and resize me!`;
               };

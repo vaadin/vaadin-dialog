@@ -28,10 +28,15 @@ This program is available under Apache License Version 2.0, available at https:/
 
       /* Resizers */
 
+      :host([resizable]) .resizer {
+        display: block;
+      }
+
       .resizer {
         position: absolute;
         height: 10px;
         width: 10px;
+        display: none;
       }
 
       .resizer.edge {
@@ -104,6 +109,7 @@ This program is available under Apache License Version 2.0, available at https:/
       on-opened-changed="_onOverlayOpened"
       with-backdrop
       theme$="[[theme]]"
+      resizable$="[[resizable]]"
       focus-trap>
     </vaadin-dialog-overlay>
   </template>
@@ -264,7 +270,7 @@ This program is available under Apache License Version 2.0, available at https:/
             draggable: {
               type: Boolean,
               value: false,
-              observer: '_draggableChanged'
+              reflectToAttribute: true
             },
 
             /**
@@ -273,7 +279,7 @@ This program is available under Apache License Version 2.0, available at https:/
             resizable: {
               type: Boolean,
               value: false,
-              observer: '_resizableChanged'
+              reflectToAttribute: true
             },
 
             _oldTemplate: Object,
@@ -299,6 +305,9 @@ This program is available under Apache License Version 2.0, available at https:/
           this._observer = new Polymer.FlattenedNodesObserver(this, info => {
             this._setTemplateFromNodes(info.addedNodes);
           });
+
+          this._addDraggableEventListeners();
+          this._addResizableEventListeners();
         }
 
         _setTemplateFromNodes(nodes) {
@@ -383,146 +392,150 @@ This program is available under Apache License Version 2.0, available at https:/
           this.$.overlay.$.backdrop.style.display = modeless ? 'none' : 'block';
         }
 
-        _draggableChanged() {
+        _addDraggableEventListeners() {
           const overlay = this.$.overlay.$.overlay;
-          const pos = {x: 0, y: 0, dx: 0, dy: 0};
+          const originalBounds = {top: 0, left: 0};
+          const originalMouse = {top: 0, left: 0};
           const stopDrag = () => {
             window.removeEventListener('mouseup', stopDrag);
             window.removeEventListener('mousemove', drag);
           };
           const drag = (e) => {
             this._snapToPixels();
-            pos.dx = pos.x - e.clientX;
-            pos.dy = pos.y - e.clientY;
-            pos.x = e.clientX;
-            pos.y = e.clientY;
-            const top = overlay.offsetTop - pos.dy;
-            const left = overlay.offsetLeft - pos.dx;
-            const bottomLimit = window.innerHeight - (overlay.clientHeight / 2);
-            const rightLimit = window.innerWidth - (overlay.clientWidth / 2);
-            const topLimit = -(overlay.clientHeight / 2);
-            const leftLimit = -(overlay.clientWidth / 2);
-            this._setBounds({
-              top: `${top < topLimit ? topLimit : top > bottomLimit ? bottomLimit : top}px`,
-              right: 'unset',
-              bottom: 'unset',
-              left: `${left < leftLimit ? leftLimit : left > rightLimit ? rightLimit : left}px`
-            });
+            const top = originalBounds.top + (e.pageY - originalMouse.top);
+            const left = originalBounds.left + (e.pageX - originalMouse.left);
+            this._setBounds({top, left});
           };
           const startDrag = (e) => {
-            this._moveOverlayToTop();
-            const target = e.relatedTarget || e.toElement;
-            if (target.matches('[part="overlay"]') || target.matches('[part="content"]')) {
-              e.preventDefault();
-              pos.x = e.clientX;
-              pos.y = e.clientY;
-              window.addEventListener('mouseup', stopDrag);
-              window.addEventListener('mousemove', drag);
+            if (this.draggable) {
+              this._moveOverlayToTop();
+              const target = e.relatedTarget || e.toElement;
+              if (target.matches('[part="overlay"]') || target.matches('[part="content"]')) {
+                e.preventDefault();
+                const bounds = overlay.getBoundingClientRect();
+                const offset = (window.innerHeight - this.$.overlay.clientHeight) / 2;
+                originalBounds.top = bounds.top - offset;
+                originalBounds.left = bounds.left - offset;
+                originalMouse.top = e.pageY;
+                originalMouse.left = e.pageX;
+                window.addEventListener('mouseup', stopDrag);
+                window.addEventListener('mousemove', drag);
+              }
             }
           };
           overlay.addEventListener('mousedown', startDrag);
         }
 
-        _resizableChanged(resizable) {
-          if (resizable) {
-            const overlay = this.$.overlay.$.overlay;
-            const resize = (e, edge) => {
-              this._snapToPixels();
-              const minimumSize = 40;
-              edge.split('').forEach(direction => {
-                switch (direction) {
-                  case 'n': {
-                    const height = originalHeight - (e.pageY - originalMouseY);
-                    if (height > minimumSize) {
-                      overlay.style.height = `${height}px`;
-                      this._setBounds({top: `${originalY + (e.pageY - originalMouseY)}px`});
-                    }
-                    break;
+        _addResizableEventListeners() {
+          const overlay = this.$.overlay.$.overlay;
+          const originalBounds = {top: 0, left: 0, width: 0, height: 0};
+          const originalMouse = {top: 0, left: 0};
+          const resize = (e, edge) => {
+            this._snapToPixels();
+            const minimumSize = 40;
+            edge.split('').forEach(direction => {
+              switch (direction) {
+                case 'n': {
+                  const height = originalBounds.height - (e.pageY - originalMouse.top);
+                  const top = originalBounds.top + (e.pageY - originalMouse.top);
+                  if (height > minimumSize) {
+                    this._setBounds({top, height});
                   }
-                  case 'e': {
-                    const width = originalWidth + (e.pageX - originalMouseX);
-                    if (width > minimumSize) {
-                      overlay.style.width = `${width}px`;
-                    }
-                    break;
-                  }
-                  case 's': {
-                    const height = originalHeight + (e.pageY - originalMouseY);
-                    if (height > minimumSize) {
-                      overlay.style.height = `${height}px`;
-                    }
-                    break;
-                  }
-                  case 'w': {
-                    const width = originalWidth - (e.pageX - originalMouseX);
-                    if (width > minimumSize) {
-                      overlay.style.width = `${width}px`;
-                      this._setBounds({left: `${originalX + (e.pageX - originalMouseX)}px`});
-                    }
-                    break;
-                  }
+                  break;
                 }
-              });
-            };
-            const stopResize = edge => window.removeEventListener('mousemove', resizeEvents[edge]);
-            const resizeEvents = {};
-            const stopResizeEvents = {};
-
-            let originalWidth;
-            let originalHeight;
-            let originalX;
-            let originalY;
-            let originalMouseX;
-            let originalMouseY;
-
-            // Note: edge controls added before corners
-            ['n', 'e', 's', 'w', 'nw', 'ne', 'se', 'sw'].forEach(edge => {
-              const resizer = document.createElement('div');
-              if (edge.length === 1) {
-                resizer.classList.add('edge');
+                case 'e': {
+                  const width = originalBounds.width + (e.pageX - originalMouse.left);
+                  if (width > minimumSize) {
+                    this._setBounds({width});
+                  }
+                  break;
+                }
+                case 's': {
+                  const height = originalBounds.height + (e.pageY - originalMouse.top);
+                  if (height > minimumSize) {
+                    this._setBounds({height});
+                  }
+                  break;
+                }
+                case 'w': {
+                  const width = originalBounds.width - (e.pageX - originalMouse.left);
+                  const left = originalBounds.left + (e.pageX - originalMouse.left);
+                  if (width > minimumSize) {
+                    this._setBounds({left, width});
+                  }
+                  break;
+                }
               }
-              resizer.classList.add('resizer', edge);
-              resizer.addEventListener('mousedown', e => {
-                e.preventDefault();
-                e.stopPropagation();
-                this._moveOverlayToTop();
-                const bounds = overlay.getBoundingClientRect();
-                const offset = (window.innerHeight - this.$.overlay.clientHeight) / 2;
-                originalWidth = bounds.width;
-                originalHeight = bounds.height;
-                originalX = bounds.left - offset;
-                originalY = bounds.top - offset;
-                originalMouseX = e.pageX;
-                originalMouseY = e.pageY;
-                resizeEvents[edge] = e => resize(e, edge);
-                stopResizeEvents[edge] = () => stopResize(edge);
-                window.addEventListener('mousemove', resizeEvents[edge]);
-                window.addEventListener('mouseup', stopResizeEvents[edge]);
-              });
-              overlay.appendChild(resizer);
             });
-          }
+          };
+          const stopResize = edge => window.removeEventListener('mousemove', resizeEvents[edge]);
+          const resizeEvents = {};
+          const stopResizeEvents = {};
+
+          // Note: edge controls added before corners
+          ['n', 'e', 's', 'w', 'nw', 'ne', 'se', 'sw'].forEach(edge => {
+            const resizer = document.createElement('div');
+            if (edge.length === 1) {
+              resizer.classList.add('edge');
+            }
+            resizer.classList.add('resizer', edge);
+            resizer.addEventListener('mousedown', e => {
+              e.preventDefault();
+              e.stopPropagation();
+              this._moveOverlayToTop();
+              const bounds = overlay.getBoundingClientRect();
+              const offset = (window.innerHeight - this.$.overlay.clientHeight) / 2;
+              originalBounds.top = bounds.top - offset;
+              originalBounds.left = bounds.left - offset;
+              originalBounds.width = bounds.width;
+              originalBounds.height = bounds.height;
+              originalMouse.top = e.pageY;
+              originalMouse.left = e.pageX;
+              resizeEvents[edge] = e => resize(e, edge);
+              stopResizeEvents[edge] = () => stopResize(edge);
+              window.addEventListener('mousemove', resizeEvents[edge]);
+              window.addEventListener('mouseup', stopResizeEvents[edge]);
+            });
+            overlay.appendChild(resizer);
+          });
         }
 
-        _setBounds({top, right, bottom, left}) {
-          const overlay = this.$.overlay.$.overlay;
+        _setBounds({top, right, bottom, left, width, height}) {
           if (typeof arguments[0] !== 'object') {
             top = arguments[0];
             right = arguments[1];
             bottom = arguments[2];
             left = arguments[3];
+            width = arguments[4];
+            height = arguments[5];
           }
-          if (top) {
-            overlay.style.top = top;
+
+          const overlay = this.$.overlay.$.overlay;
+          const bounds = {top, right, bottom, left, width, height};
+
+          for (const arg in bounds) {
+            if (typeof bounds[arg] === 'number') {
+              bounds[arg] = `${bounds[arg]}px`;
+            }
           }
-          if (right) {
-            overlay.style.right = right;
+
+          if (bounds.top) {
+            overlay.style.top = bounds.top;
           }
-          if (bottom) {
-            overlay.style.bottom = bottom;
+          if (bounds.right) {
+            overlay.style.right = bounds.right;
           }
-          if (left) {
-            overlay.style.left = left;
+          if (bounds.bottom) {
+            overlay.style.bottom = bounds.bottom;
+          }
+          if (bounds.left) {
+            overlay.style.left = bounds.left;
+          }
+          if (bounds.width) {
+            overlay.style.width = bounds.width;
+          }
+          if (bounds.height) {
+            overlay.style.height = bounds.height;
           }
         }
 
@@ -532,13 +545,13 @@ This program is available under Apache License Version 2.0, available at https:/
             const bounds = overlay.getBoundingClientRect();
             overlay.style.position = 'absolute';
             overlay.style.maxWidth = 'unset';
-            overlay.style.width = `${bounds.width}px`;
-            overlay.style.height = `${bounds.height}px`;
             const container = this.$.overlay;
-            const offset = window.innerHeight - container.clientHeight; // idk why I need this offset ¯\_(ツ)_/¯
-            const top = `${(container.clientHeight - overlay.clientHeight) / 2 - offset}px`;
-            const left = `${(container.clientWidth - overlay.clientWidth) / 2}px`;
-            this._setBounds({top, left});
+            const offset = window.innerHeight - container.clientHeight;
+            const top = (container.clientHeight - overlay.clientHeight) / 2 - offset;
+            const left = (container.clientWidth - overlay.clientWidth) / 2;
+            const width = bounds.width;
+            const height = bounds.height;
+            this._setBounds({top, left, width, height});
           }
         }
 
