@@ -28,15 +28,14 @@ This program is available under Apache License Version 2.0, available at https:/
 
       /* Resizers */
 
-      :host([resizable]) .resizer {
-        display: block;
+      :host(:not([resizable])) .resizer {
+        display: none;
       }
 
       .resizer {
         position: absolute;
         height: 10px;
         width: 10px;
-        display: none;
       }
 
       .resizer.edge {
@@ -407,11 +406,14 @@ This program is available under Apache License Version 2.0, available at https:/
             this._setBounds({top, left});
           };
           const startDrag = (e) => {
+
             if (this.draggable) {
-              this._moveOverlayToTop();
               const target = e.relatedTarget || e.toElement;
               if (target.matches('[part="overlay"]') || target.matches('[part="content"]')) {
                 e.preventDefault();
+                if (this.modeless) {
+                  this._moveOverlayToTop();
+                }
                 const bounds = overlay.getBoundingClientRect();
                 const offset = (window.innerHeight - this.$.overlay.clientHeight) / 2;
                 originalBounds.top = bounds.top - offset;
