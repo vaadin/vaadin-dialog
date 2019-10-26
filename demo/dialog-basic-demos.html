@@ -234,6 +234,15 @@
             Array.from(document.querySelectorAll('vaadin-dialog')).forEach(function(dialog, i) {
               dialog.renderer = function(root, dialog) {
                 root.textContent = `Dialog ${i + 1}: Drag me around and resize me!`;
+                const closeButton = window.document.createElement('vaadin-button');
+                closeButton.setAttribute('theme', 'primary');
+                closeButton.textContent = 'Close';
+                closeButton.style.display = 'inline-block';
+                closeButton.style.marginLeft = '1em';
+                closeButton.addEventListener('click', function() {
+                  dialog.opened = false;
+                });
+                root.appendChild(closeButton);
               };
               document.querySelectorAll('vaadin-button')[i].addEventListener('click', function() {
                 dialog.opened = !dialog.opened;
@@ -243,7 +252,7 @@
         </script>
       </template>
     </vaadin-demo-snippet>
-    
+
   </template>
   <script>
     class DialogBasicDemos extends DemoReadyEventEmitter(DialogDemo(Polymer.Element)) {
