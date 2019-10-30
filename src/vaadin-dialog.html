@@ -406,7 +406,6 @@ This program is available under Apache License Version 2.0, available at https:/
             this._setBounds({top, left});
           };
           const startDrag = (e) => {
-
             if (this.draggable) {
               const target = e.relatedTarget || e.toElement;
               if (target.matches('[part="overlay"]') || target.matches('[part="content"]')) {
@@ -414,10 +413,10 @@ This program is available under Apache License Version 2.0, available at https:/
                 if (this.modeless) {
                   this._moveOverlayToTop();
                 }
-                const bounds = overlay.getBoundingClientRect();
-                const offset = (window.innerHeight - this.$.overlay.clientHeight) / 2;
-                originalBounds.top = bounds.top - offset;
-                originalBounds.left = bounds.left - offset;
+                const overlayBounds = overlay.getBoundingClientRect();
+                const containerBounds = this.$.overlay.getBoundingClientRect();
+                originalBounds.top = overlayBounds.top - containerBounds.top;
+                originalBounds.left = overlayBounds.left - containerBounds.left;
                 originalMouse.top = e.pageY;
                 originalMouse.left = e.pageX;
                 window.addEventListener('mouseup', stopDrag);
@@ -485,12 +484,12 @@ This program is available under Apache License Version 2.0, available at https:/
               e.preventDefault();
               e.stopPropagation();
               this._moveOverlayToTop();
-              const bounds = overlay.getBoundingClientRect();
-              const offset = (window.innerHeight - this.$.overlay.clientHeight) / 2;
-              originalBounds.top = bounds.top - offset;
-              originalBounds.left = bounds.left - offset;
-              originalBounds.width = bounds.width;
-              originalBounds.height = bounds.height;
+              const overlayBounds = overlay.getBoundingClientRect();
+              const containerBounds = this.$.overlay.getBoundingClientRect();
+              originalBounds.top = overlayBounds.top - containerBounds.top;
+              originalBounds.left = overlayBounds.left - containerBounds.left;
+              originalBounds.width = overlayBounds.width;
+              originalBounds.height = overlayBounds.height;
               originalMouse.top = e.pageY;
               originalMouse.left = e.pageX;
               resizeEvents[edge] = e => resize(e, edge);
@@ -514,6 +513,10 @@ This program is available under Apache License Version 2.0, available at https:/
 
           const overlay = this.$.overlay.$.overlay;
           const bounds = {top, right, bottom, left, width, height};
+
+          if (overlay.style.position !== 'absolute') {
+            overlay.style.position = 'absolute';
+          }
 
           for (const arg in bounds) {
             if (typeof bounds[arg] === 'number') {
@@ -544,15 +547,14 @@ This program is available under Apache License Version 2.0, available at https:/
         _snapToPixels() {
           const overlay = this.$.overlay.$.overlay;
           if (overlay.style.position !== 'absolute') {
-            const bounds = overlay.getBoundingClientRect();
+            const overlayBounds = overlay.getBoundingClientRect();
+            const containerBounds = this.$.overlay.getBoundingClientRect();
+            const top = overlayBounds.top - containerBounds.top;
+            const left = overlayBounds.left - containerBounds.left;
+            const width = overlayBounds.width;
+            const height = overlayBounds.height;
             overlay.style.position = 'absolute';
             overlay.style.maxWidth = 'unset';
-            const container = this.$.overlay;
-            const offset = window.innerHeight - container.clientHeight;
-            const top = (container.clientHeight - overlay.clientHeight) / 2 - offset;
-            const left = (container.clientWidth - overlay.clientWidth) / 2;
-            const width = bounds.width;
-            const height = bounds.height;
             this._setBounds({top, left, width, height});
           }
         }
