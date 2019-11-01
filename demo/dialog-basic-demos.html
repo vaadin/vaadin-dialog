@@ -231,9 +231,12 @@
         <vaadin-button>Toggle dialog 2</vaadin-button>
         <script>
           window.addDemoReadyListener('#dialog-basic-demos-modeless-draggable-resizable-dialog', function(document) {
-            Array.from(document.querySelectorAll('vaadin-dialog')).forEach(function(dialog, i) {
+            const dialogs = document.querySelectorAll('vaadin-dialog');
+            for (let i = 0; i < dialogs.length; i++) {
+              const dialog = dialogs[i];
+              const dialogIndex = i + 1;
               dialog.renderer = function(root, dialog) {
-                root.textContent = `Dialog ${i + 1}: Drag me around and resize me!`;
+                root.textContent = 'Dialog ' + dialogIndex + ': Drag me around and resize me!';
                 const closeButton = window.document.createElement('vaadin-button');
                 closeButton.setAttribute('theme', 'primary');
                 closeButton.textContent = 'Close';
@@ -247,7 +250,7 @@
               document.querySelectorAll('vaadin-button')[i].addEventListener('click', function() {
                 dialog.opened = !dialog.opened;
               });
-            });
+            }
           });
         </script>
       </template>

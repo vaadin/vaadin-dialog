@@ -47,7 +47,7 @@ This program is available under Apache License Version 2.0, available at https:/
 
       .resizer.edge.n {
         width: auto;
-        bottom: unset;
+        bottom: auto;
         cursor: n-resize;
       }
 
@@ -59,7 +59,7 @@ This program is available under Apache License Version 2.0, available at https:/
 
       .resizer.edge.e {
         height: auto;
-        left: unset;
+        left: auto;
         cursor: e-resize;
       }
 
@@ -71,7 +71,7 @@ This program is available under Apache License Version 2.0, available at https:/
 
       .resizer.edge.s {
         width: auto;
-        top: unset;
+        top: auto;
         cursor: s-resize;
       }
 
@@ -83,7 +83,7 @@ This program is available under Apache License Version 2.0, available at https:/
 
       .resizer.edge.w {
         height: auto;
-        right: unset;
+        right: auto;
         cursor: w-resize;
       }
 
@@ -408,7 +408,9 @@ This program is available under Apache License Version 2.0, available at https:/
           const startDrag = (e) => {
             if (this.draggable) {
               const target = e.target;
-              if (target.matches('[part="overlay"]') || target.matches('[part="content"]')) {
+              const isOverlayPart = target.matches ? target.matches('[part="overlay"]') : target.msMatchesSelector('[part="overlay"]');
+              const isContentPart = target.matches ? target.matches('[part="content"]') : target.msMatchesSelector('[part="content"]');
+              if (isOverlayPart || isContentPart) {
                 e.preventDefault();
                 if (this.modeless) {
                   this._moveOverlayToTop();
@@ -479,7 +481,8 @@ This program is available under Apache License Version 2.0, available at https:/
             if (edge.length === 1) {
               resizer.classList.add('edge');
             }
-            resizer.classList.add('resizer', edge);
+            resizer.classList.add('resizer');
+            resizer.classList.add(edge);
             resizer.addEventListener('mousedown', e => {
               e.preventDefault();
               e.stopPropagation();
@@ -554,7 +557,7 @@ This program is available under Apache License Version 2.0, available at https:/
             const width = overlayBounds.width;
             const height = overlayBounds.height;
             overlay.style.position = 'absolute';
-            overlay.style.maxWidth = 'unset';
+            overlay.style.maxWidth = 'auto';
             this._setBounds({top, left, width, height});
           }
         }
