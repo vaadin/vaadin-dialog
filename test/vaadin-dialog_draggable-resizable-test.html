@@ -35,6 +35,7 @@
       <vaadin-dialog draggable opened>
         <template>
           <div>Draggable dialog</div>
+          <button>OK</button>
         </template>
       </vaadin-dialog>
     </template>
@@ -63,7 +64,14 @@
         });
 
         it('should set bounds correctly', () => {
-          dialog._setBounds(200, 'auto', 'auto', 200, 200, 200);
+          dialog._setBounds({
+            top: 200,
+            right: 'auto',
+            bottom: 'auto',
+            left: 200,
+            width: 200,
+            height: 200
+          });
           expect(overlay.style.top).to.be.eql('200px');
           expect(overlay.style.right).to.be.eql('auto');
           expect(overlay.style.bottom).to.be.eql('auto');
@@ -96,13 +104,13 @@
 
         it('should be modal by default', () => {
           expect(overlay.modeless).to.eql(false);
-          expect(backdrop.style.display).to.eql('block');
+          expect(backdrop.hidden).to.eql(false);
         });
 
         it('should not be modal when modeless is true', () => {
           dialog.modeless = true;
           expect(overlay.modeless).to.eql(true);
-          expect(backdrop.style.display).to.eql('none');
+          expect(backdrop.hidden).to.eql(true);
         });
       });
 
@@ -202,14 +210,7 @@
       });
       
       describe('draggable', () => {
-        var dialog, overlay, bounds, dx;
-
-        beforeEach(() => {
-          dialog = fixture('draggable');
-          overlay = dialog.$.overlay.$.overlay;
-          bounds = overlay.getBoundingClientRect();
-          dx = 100;
-        });
+        var dialog, overlay, button, bounds, dx;
 
         function drag(target) {
           const bounds = target.getBoundingClientRect();
@@ -220,6 +221,14 @@
           dispatchMouseEvent(target, 'mousemove', toXY);
           dispatchMouseEvent(target, 'mouseup', toXY);
         }
+
+        beforeEach(() => {
+          dialog = fixture('draggable');
+          overlay = dialog.$.overlay.$.overlay;
+          button = dialog.$.overlay.querySelector('button');
+          bounds = overlay.getBoundingClientRect();
+          dx = 100;
+        });
 
         it('should drag and move dialog if mousedown on [part="overlay"]', () => {
           drag(overlay);
@@ -240,6 +249,13 @@
           const draggedBounds = overlay.getBoundingClientRect();
           expect(parseInt(draggedBounds.top)).to.be.eql(parseInt(bounds.top));
           expect(parseInt(draggedBounds.left)).to.be.eql(parseInt(bounds.left));
+        });
+
+        it('should fire button click event when draggable', () => {
+          const onClick = sinon.spy();
+          button.addEventListener('click', onClick);
+          button.dispatchEvent(new MouseEvent('click'));
+          expect(onClick).to.be.calledOnce;
         });
       });
   </script>
