@@ -10,6 +10,8 @@ This program is available under Apache License Version 2.0, available at https:/
 <link rel="import" href="../../vaadin-element-mixin/vaadin-element-mixin.html">
 <link rel="import" href="../../polymer/lib/utils/flattened-nodes-observer.html">
 <link rel="import" href="../../vaadin-themable-mixin/vaadin-theme-property-mixin.html">
+<link rel="import" href="./vaadin-dialog-draggable-mixin.html">
+<link rel="import" href="./vaadin-dialog-resizable-mixin.html">
 
 <dom-module id="vaadin-dialog-overlay-styles" theme-for="vaadin-dialog-overlay">
   <template>
@@ -20,77 +22,6 @@ This program is available under Apache License Version 2.0, available at https:/
       */
       [part="content"] {
         min-width: 12em; /* matches the default <vaadin-text-field> width */
-      }
-
-      [part="overlay"] {
-        position: relative;
-      }
-
-      /* Resizers */
-
-      :host(:not([resizable])) .resizer {
-        display: none;
-      }
-
-      .resizer {
-        position: absolute;
-        height: 10px;
-        width: 10px;
-      }
-
-      .resizer.edge {
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-      }
-
-      .resizer.edge.n {
-        width: auto;
-        bottom: auto;
-        cursor: n-resize;
-      }
-
-      .resizer.ne {
-        top: 0;
-        right: 0;
-        cursor: ne-resize;
-      }
-
-      .resizer.edge.e {
-        height: auto;
-        left: auto;
-        cursor: e-resize;
-      }
-
-      .resizer.se {
-        bottom: 0;
-        right: 0;
-        cursor: se-resize;
-      }
-
-      .resizer.edge.s {
-        width: auto;
-        top: auto;
-        cursor: s-resize;
-      }
-
-      .resizer.sw {
-        bottom: 0;
-        left: 0;
-        cursor: sw-resize;
-      }
-
-      .resizer.edge.w {
-        height: auto;
-        right: auto;
-        cursor: w-resize;
-      }
-
-      .resizer.nw {
-        top: 0;
-        left: 0;
-        cursor: nw-resize;
       }
     </style>
   </template>
@@ -115,6 +46,8 @@ This program is available under Apache License Version 2.0, available at https:/
   </template>
   <script>
     (function() {
+      let memoizedTemplate;
+
       /**
        * @namespace Vaadin
        */
@@ -134,6 +67,20 @@ This program is available under Apache License Version 2.0, available at https:/
       class DialogOverlayElement extends Vaadin.OverlayElement {
         static get is() {
           return 'vaadin-dialog-overlay';
+        }
+
+        static get template() {
+          if (!memoizedTemplate) {
+            memoizedTemplate = super.template.cloneNode(true);
+            const contentPart = memoizedTemplate.content.querySelector('[part="content"]');
+            const overlayPart = memoizedTemplate.content.querySelector('[part="overlay"]');
+            const resizableContainer = document.createElement('div');
+            resizableContainer.id = 'resizableContainer';
+            resizableContainer.classList.add('resizer-container');
+            resizableContainer.appendChild(contentPart);
+            overlayPart.appendChild(resizableContainer);
+          }
+          return memoizedTemplate;
         }
       }
 
@@ -199,7 +146,12 @@ This program is available under Apache License Version 2.0, available at https:/
        * @mixes Vaadin.ThemePropertyMixin
        * @demo demo/index.html
        */
-      class DialogElement extends Vaadin.ThemePropertyMixin(Vaadin.ElementMixin(Polymer.Element)) {
+      class DialogElement extends
+        Vaadin.ThemePropertyMixin(
+          Vaadin.ElementMixin(
+            Vaadin.DialogDraggableMixin(
+              Vaadin.DialogResizableMixin(
+                Polymer.Element)))) {
         static get is() {
           return 'vaadin-dialog';
         }
@@ -310,9 +262,6 @@ This program is available under Apache License Version 2.0, available at https:/
           this._observer = new Polymer.FlattenedNodesObserver(this, info => {
             this._setTemplateFromNodes(info.addedNodes);
           });
-
-          this._addDraggableEventListeners();
-          this._addResizableEventListeners();
         }
 
         _setTemplateFromNodes(nodes) {
@@ -392,122 +341,8 @@ This program is available under Apache License Version 2.0, available at https:/
           }
         }
 
-        _addDraggableEventListeners() {
+        _setBounds(bounds) {
           const overlay = this.$.overlay.$.overlay;
-          const originalBounds = {top: 0, left: 0};
-          const originalMouse = {top: 0, left: 0};
-          const stopDrag = () => {
-            window.removeEventListener('mouseup', stopDrag);
-            window.removeEventListener('mousemove', drag);
-          };
-          const drag = (e) => {
-            this._snapToPixels();
-            const top = originalBounds.top + (e.pageY - originalMouse.top);
-            const left = originalBounds.left + (e.pageX - originalMouse.left);
-            this._setBounds({top, left});
-          };
-          const startDrag = (e) => {
-            if (this.draggable) {
-              const target = e.target;
-              const isOverlayPart = target.matches ? target.matches('[part="overlay"]') : target.msMatchesSelector('[part="overlay"]');
-              const isContentPart = target.matches ? target.matches('[part="content"]') : target.msMatchesSelector('[part="content"]');
-              if (isOverlayPart || isContentPart) {
-                e.preventDefault();
-                if (this.modeless) {
-                  this._moveOverlayToTop();
-                }
-                const overlayBounds = overlay.getBoundingClientRect();
-                const containerBounds = this.$.overlay.getBoundingClientRect();
-                originalBounds.top = overlayBounds.top - containerBounds.top;
-                originalBounds.left = overlayBounds.left - containerBounds.left;
-                originalMouse.top = e.pageY;
-                originalMouse.left = e.pageX;
-                window.addEventListener('mouseup', stopDrag);
-                window.addEventListener('mousemove', drag);
-              }
-            }
-          };
-          overlay.addEventListener('mousedown', startDrag);
-        }
-
-        _addResizableEventListeners() {
-          const overlay = this.$.overlay.$.overlay;
-          const originalBounds = {top: 0, left: 0, width: 0, height: 0};
-          const originalMouse = {top: 0, left: 0};
-          const resize = (e, edge) => {
-            this._snapToPixels();
-            const minimumSize = 40;
-            edge.split('').forEach(direction => {
-              switch (direction) {
-                case 'n': {
-                  const height = originalBounds.height - (e.pageY - originalMouse.top);
-                  const top = originalBounds.top + (e.pageY - originalMouse.top);
-                  if (height > minimumSize) {
-                    this._setBounds({top, height});
-                  }
-                  break;
-                }
-                case 'e': {
-                  const width = originalBounds.width + (e.pageX - originalMouse.left);
-                  if (width > minimumSize) {
-                    this._setBounds({width});
-                  }
-                  break;
-                }
-                case 's': {
-                  const height = originalBounds.height + (e.pageY - originalMouse.top);
-                  if (height > minimumSize) {
-                    this._setBounds({height});
-                  }
-                  break;
-                }
-                case 'w': {
-                  const width = originalBounds.width - (e.pageX - originalMouse.left);
-                  const left = originalBounds.left + (e.pageX - originalMouse.left);
-                  if (width > minimumSize) {
-                    this._setBounds({left, width});
-                  }
-                  break;
-                }
-              }
-            });
-          };
-          const stopResize = edge => window.removeEventListener('mousemove', resizeEvents[edge]);
-          const resizeEvents = {};
-          const stopResizeEvents = {};
-
-          // Note: edge controls added before corners
-          ['n', 'e', 's', 'w', 'nw', 'ne', 'se', 'sw'].forEach(edge => {
-            const resizer = document.createElement('div');
-            if (edge.length === 1) {
-              resizer.classList.add('edge');
-            }
-            resizer.classList.add('resizer');
-            resizer.classList.add(edge);
-            resizer.addEventListener('mousedown', e => {
-              e.preventDefault();
-              e.stopPropagation();
-              this._moveOverlayToTop();
-              const overlayBounds = overlay.getBoundingClientRect();
-              const containerBounds = this.$.overlay.getBoundingClientRect();
-              originalBounds.top = overlayBounds.top - containerBounds.top;
-              originalBounds.left = overlayBounds.left - containerBounds.left;
-              originalBounds.width = overlayBounds.width;
-              originalBounds.height = overlayBounds.height;
-              originalMouse.top = e.pageY;
-              originalMouse.left = e.pageX;
-              resizeEvents[edge] = e => resize(e, edge);
-              stopResizeEvents[edge] = () => stopResize(edge);
-              window.addEventListener('mousemove', resizeEvents[edge]);
-              window.addEventListener('mouseup', stopResizeEvents[edge]);
-            });
-            overlay.appendChild(resizer);
-          });
-        }
-
-        _setBounds({top, right, bottom, left, width, height}) {
-          const overlay = this.$.overlay.$.overlay;
-          const bounds = {top, right, bottom, left, width, height};
 
           if (overlay.style.position !== 'absolute') {
             overlay.style.position = 'absolute';
@@ -519,43 +354,32 @@ This program is available under Apache License Version 2.0, available at https:/
             }
           }
 
-          if (bounds.top) {
-            overlay.style.top = bounds.top;
-          }
-          if (bounds.right) {
-            overlay.style.right = bounds.right;
-          }
-          if (bounds.bottom) {
-            overlay.style.bottom = bounds.bottom;
-          }
-          if (bounds.left) {
-            overlay.style.left = bounds.left;
-          }
-          if (bounds.width) {
-            overlay.style.width = bounds.width;
-          }
-          if (bounds.height) {
-            overlay.style.height = bounds.height;
-          }
+          Object.assign(overlay.style, bounds);
         }
 
         _snapToPixels() {
           const overlay = this.$.overlay.$.overlay;
           if (overlay.style.position !== 'absolute') {
-            const overlayBounds = overlay.getBoundingClientRect();
-            const containerBounds = this.$.overlay.getBoundingClientRect();
-            const top = overlayBounds.top - containerBounds.top;
-            const left = overlayBounds.left - containerBounds.left;
-            const width = overlayBounds.width;
-            const height = overlayBounds.height;
-            overlay.style.position = 'absolute';
             overlay.style.maxWidth = 'auto';
-            this._setBounds({top, left, width, height});
+            this._setBounds(this._getOverlayBounds());
           }
         }
 
         _moveOverlayToTop() {
-          document.body.appendChild(this.$.overlay);
+          if (this.modeless) {
+            document.body.appendChild(this.$.overlay);
+          }
+        }
+
+        _getOverlayBounds() {
+          const overlay = this.$.overlay.$.overlay;
+          const overlayBounds = overlay.getBoundingClientRect();
+          const containerBounds = this.$.overlay.getBoundingClientRect();
+          const top = overlayBounds.top - containerBounds.top;
+          const left = overlayBounds.left - containerBounds.left;
+          const width = overlayBounds.width;
+          const height = overlayBounds.height;
+          return {top, left, width, height};
         }
       }
 

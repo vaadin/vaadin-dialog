@@ -1,0 +1,173 @@
+<dom-module id="vaadin-dialog-resizable-overlay-styles" theme-for="vaadin-dialog-overlay">
+  <template>
+    <style>
+      [part="overlay"] {
+        position: relative;
+        overflow: visible;
+      }
+
+      .resizer-container {
+        height: 100%;
+        overflow: auto;
+      }
+
+      :host(:not([resizable])) .resizer {
+        display: none;
+      }
+
+      .resizer {
+        position: absolute;
+        height: 10px;
+        width: 10px;
+      }
+
+      .resizer.edge {
+        top: -5px;
+        right: -5px;
+        bottom: -5px;
+        left: -5px;
+      }
+
+      .resizer.edge.n {
+        width: auto;
+        bottom: auto;
+        cursor: n-resize;
+      }
+
+      .resizer.ne {
+        top: -5px;
+        right: -5px;
+        cursor: ne-resize;
+      }
+
+      .resizer.edge.e {
+        height: auto;
+        left: auto;
+        cursor: e-resize;
+      }
+
+      .resizer.se {
+        bottom: -5px;
+        right: -5px;
+        cursor: se-resize;
+      }
+
+      .resizer.edge.s {
+        width: auto;
+        top: auto;
+        cursor: s-resize;
+      }
+
+      .resizer.sw {
+        bottom: -5px;
+        left: -5px;
+        cursor: sw-resize;
+      }
+
+      .resizer.edge.w {
+        height: auto;
+        right: auto;
+        cursor: w-resize;
+      }
+
+      .resizer.nw {
+        top: -5px;
+        left: -5px;
+        cursor: nw-resize;
+      }
+    </style>
+  </template>
+</dom-module>
+
+<script>
+  /**
+   * @namespace Vaadin
+   */
+  window.Vaadin = window.Vaadin || {};
+
+  /**
+   * @polymerMixin
+   * @memberof Vaadin
+   */
+  Vaadin.DialogResizableMixin = subclass => class VaadinDialogResizableMixin extends subclass {
+    ready() {
+      super.ready();
+      this._addResizableEventListeners();
+    }
+
+    _addResizableEventListeners() {
+      let originalBounds;
+      let originalMouse;
+      const resizeEvents = {};
+      const stopResizeEvents = {};
+
+      const resize = (e, resizer) => {
+        this._snapToPixels();
+        const minimumSize = 40;
+        resizer.split('').forEach(direction => {
+          switch (direction) {
+            case 'n': {
+              const height = originalBounds.height - (e.pageY - originalMouse.top);
+              const top = originalBounds.top + (e.pageY - originalMouse.top);
+              if (height > minimumSize) {
+                this._setBounds({top, height});
+              }
+              break;
+            }
+            case 'e': {
+              const width = originalBounds.width + (e.pageX - originalMouse.left);
+              if (width > minimumSize) {
+                this._setBounds({width});
+              }
+              break;
+            }
+            case 's': {
+              const height = originalBounds.height + (e.pageY - originalMouse.top);
+              if (height > minimumSize) {
+                this._setBounds({height});
+              }
+              break;
+            }
+            case 'w': {
+              const width = originalBounds.width - (e.pageX - originalMouse.left);
+              const left = originalBounds.left + (e.pageX - originalMouse.left);
+              if (width > minimumSize) {
+                this._setBounds({left, width});
+              }
+              break;
+            }
+          }
+        });
+      };
+
+      const stopResize = direction => {
+        window.removeEventListener('mouseup', stopResizeEvents[direction]);
+        window.removeEventListener('mousemove', resizeEvents[direction]);
+      };
+
+      // Note: edge controls added before corners
+      ['n', 'e', 's', 'w', 'nw', 'ne', 'se', 'sw'].forEach(direction => {
+        const resizer = document.createElement('div');
+        if (direction.length === 1) {
+          resizer.classList.add('edge');
+        }
+        resizer.classList.add('resizer');
+        resizer.classList.add(direction);
+        resizer.addEventListener('mousedown', e => {
+          if (e.button === 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            this._moveOverlayToTop();
+            originalBounds = this._getOverlayBounds();
+            originalMouse = {top: e.pageY, left: e.pageX};
+            resizeEvents[direction] = e => resize(e, direction);
+            stopResizeEvents[direction] = () => stopResize(direction);
+            window.addEventListener('mousemove', resizeEvents[direction]);
+            window.addEventListener('mouseup', stopResizeEvents[direction]);
+          }
+        });
+        this.$.overlay.$.resizableContainer.appendChild(resizer);
+      });
+    }
+  };
+</script>

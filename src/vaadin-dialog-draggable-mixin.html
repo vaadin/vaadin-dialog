@@ -1,0 +1,47 @@
+<script>
+  /**
+   * @namespace Vaadin
+   */
+  window.Vaadin = window.Vaadin || {};
+
+  /**
+   * @polymerMixin
+   * @memberof Vaadin
+   */
+  Vaadin.DialogDraggableMixin = subclass => class VaadinDialogDraggableMixin extends subclass {
+    ready() {
+      super.ready();
+      this._addDraggableEventListeners();
+    }
+
+    _addDraggableEventListeners() {
+      let originalBounds;
+      let originalMouse;
+      const stopDrag = () => {
+        window.removeEventListener('mouseup', stopDrag);
+        window.removeEventListener('mousemove', drag);
+      };
+      const drag = (e) => {
+        this._snapToPixels();
+        const top = originalBounds.top + (e.pageY - originalMouse.top);
+        const left = originalBounds.left + (e.pageX - originalMouse.left);
+        this._setBounds({top, left});
+      };
+      const startDrag = (e) => {
+        if (this.draggable && e.button === 0) {
+          const isOverlayPart = e.target === this.$.overlay.$.overlay;
+          const isContentPart = e.target === this.$.overlay.$.content;
+          if (isOverlayPart || isContentPart) {
+            e.preventDefault();
+            this._moveOverlayToTop();
+            originalBounds = this._getOverlayBounds();
+            originalMouse = {top: e.pageY, left: e.pageX};
+            window.addEventListener('mouseup', stopDrag);
+            window.addEventListener('mousemove', drag);
+          }
+        }
+      };
+      this.$.overlay.$.overlay.addEventListener('mousedown', startDrag);
+    }
+  };
+</script>
