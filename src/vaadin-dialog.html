@@ -74,11 +74,11 @@ This program is available under Apache License Version 2.0, available at https:/
             memoizedTemplate = super.template.cloneNode(true);
             const contentPart = memoizedTemplate.content.querySelector('[part="content"]');
             const overlayPart = memoizedTemplate.content.querySelector('[part="overlay"]');
-            const resizableContainer = document.createElement('div');
-            resizableContainer.id = 'resizableContainer';
-            resizableContainer.classList.add('resizer-container');
-            resizableContainer.appendChild(contentPart);
-            overlayPart.appendChild(resizableContainer);
+            const resizerContainer = document.createElement('div');
+            resizerContainer.id = 'resizerContainer';
+            resizerContainer.classList.add('resizer-container');
+            resizerContainer.appendChild(contentPart);
+            overlayPart.appendChild(resizerContainer);
           }
           return memoizedTemplate;
         }

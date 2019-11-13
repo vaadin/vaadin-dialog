@@ -29,9 +29,9 @@
       };
       const startDrag = (e) => {
         if (this.draggable && e.button === 0) {
-          const isOverlayPart = e.target === this.$.overlay.$.overlay;
+          const isResizerContainer = e.target === this.$.overlay.$.resizerContainer;
           const isContentPart = e.target === this.$.overlay.$.content;
-          if (isOverlayPart || isContentPart) {
+          if (isResizerContainer || isContentPart) {
             e.preventDefault();
             this._moveOverlayToTop();
             originalBounds = this._getOverlayBounds();
