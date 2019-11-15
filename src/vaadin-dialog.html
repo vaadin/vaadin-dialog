@@ -343,26 +343,20 @@ This program is available under Apache License Version 2.0, available at https:/
 
         _setBounds(bounds) {
           const overlay = this.$.overlay.$.overlay;
+          const parsedBounds = Object.assign({}, bounds);
 
           if (overlay.style.position !== 'absolute') {
             overlay.style.position = 'absolute';
+            overlay.style.maxWidth = 'none';
           }
 
-          for (const arg in bounds) {
-            if (typeof bounds[arg] === 'number') {
-              bounds[arg] = `${bounds[arg]}px`;
+          for (const arg in parsedBounds) {
+            if (typeof parsedBounds[arg] === 'number') {
+              parsedBounds[arg] = `${parsedBounds[arg]}px`;
             }
           }
 
-          Object.assign(overlay.style, bounds);
-        }
-
-        _snapToPixels() {
-          const overlay = this.$.overlay.$.overlay;
-          if (overlay.style.position !== 'absolute') {
-            overlay.style.maxWidth = 'auto';
-            this._setBounds(this._getOverlayBounds());
-          }
+          Object.assign(overlay.style, parsedBounds);
         }
 
         _moveOverlayToTop() {
