@@ -92,17 +92,16 @@
   Vaadin.DialogResizableMixin = subclass => class VaadinDialogResizableMixin extends subclass {
     ready() {
       super.ready();
+      this._resizeEvents = {};
+      this._stopResizeEvents = {};
       this._addResizableEventListeners();
     }
 
     _addResizableEventListeners() {
       let originalBounds;
       let originalMouse;
-      const resizeEvents = {};
-      const stopResizeEvents = {};
 
       const resize = (e, resizer) => {
-        this._snapToPixels();
         const minimumSize = 40;
         resizer.split('').forEach(direction => {
           switch (direction) {
@@ -141,13 +140,15 @@
       };
 
       const stopResize = direction => {
-        window.removeEventListener('mouseup', stopResizeEvents[direction]);
-        window.removeEventListener('mousemove', resizeEvents[direction]);
+        window.removeEventListener('mouseup', this._stopResizeEvents[direction]);
+        window.removeEventListener('mousemove', this._resizeEvents[direction]);
       };
 
       // Note: edge controls added before corners
       ['n', 'e', 's', 'w', 'nw', 'ne', 'se', 'sw'].forEach(direction => {
         const resizer = document.createElement('div');
+        this._resizeEvents[direction] = e => resize(e, direction);
+        this._stopResizeEvents[direction] = () => stopResize(direction);
         if (direction.length === 1) {
           resizer.classList.add('edge');
         }
@@ -160,10 +161,9 @@
             this._moveOverlayToTop();
             originalBounds = this._getOverlayBounds();
             originalMouse = {top: e.pageY, left: e.pageX};
-            resizeEvents[direction] = e => resize(e, direction);
-            stopResizeEvents[direction] = () => stopResize(direction);
-            window.addEventListener('mousemove', resizeEvents[direction]);
-            window.addEventListener('mouseup', stopResizeEvents[direction]);
+            window.addEventListener('mousemove', this._resizeEvents[direction]);
+            window.addEventListener('mouseup', this._stopResizeEvents[direction]);
+            this._setBounds(originalBounds);
           }
         });
         this.$.overlay.$.resizerContainer.appendChild(resizer);

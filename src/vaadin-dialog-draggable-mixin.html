@@ -17,17 +17,16 @@
     _addDraggableEventListeners() {
       let originalBounds;
       let originalMouse;
-      const stopDrag = () => {
-        window.removeEventListener('mouseup', stopDrag);
-        window.removeEventListener('mousemove', drag);
+      this._stopDrag = () => {
+        window.removeEventListener('mouseup', this._stopDrag);
+        window.removeEventListener('mousemove', this._drag);
       };
-      const drag = (e) => {
-        this._snapToPixels();
+      this._drag = (e) => {
         const top = originalBounds.top + (e.pageY - originalMouse.top);
         const left = originalBounds.left + (e.pageX - originalMouse.left);
         this._setBounds({top, left});
       };
-      const startDrag = (e) => {
+      this._startDrag = (e) => {
         if (this.draggable && e.button === 0) {
           const isResizerContainer = e.target === this.$.overlay.$.resizerContainer;
           const isContentPart = e.target === this.$.overlay.$.content;
@@ -36,12 +35,13 @@
             this._moveOverlayToTop();
             originalBounds = this._getOverlayBounds();
             originalMouse = {top: e.pageY, left: e.pageX};
-            window.addEventListener('mouseup', stopDrag);
-            window.addEventListener('mousemove', drag);
+            window.addEventListener('mouseup', this._stopDrag);
+            window.addEventListener('mousemove', this._drag);
+            this._setBounds(originalBounds);
           }
         }
       };
-      this.$.overlay.$.overlay.addEventListener('mousedown', startDrag);
+      this.$.overlay.$.overlay.addEventListener('mousedown', this._startDrag);
     }
   };
 </script>
