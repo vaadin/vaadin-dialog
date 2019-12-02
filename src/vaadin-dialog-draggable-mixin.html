@@ -33,7 +33,9 @@
             this._originalMouse = {top: e.pageY, left: e.pageX};
             window.addEventListener('mouseup', this._stopDrag);
             window.addEventListener('mousemove', this._drag);
-            this._setBounds(this._originalBounds);
+            if (this.$.overlay.$.overlay.style.position !== 'absolute') {
+              this._setBounds(this._originalBounds);
+            }
           }
         }
       }
