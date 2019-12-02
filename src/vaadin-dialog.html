@@ -375,6 +375,10 @@ This program is available under Apache License Version 2.0, available at https:/
           const height = overlayBounds.height;
           return {top, left, width, height};
         }
+
+        _mouseInWindow(e) {
+          return e.clientX >= 0 && e.clientX <= window.innerWidth && e.clientY >= 0 && e.clientY <= window.innerHeight;
+        }
       }
 
       customElements.define(DialogElement.is, DialogElement);

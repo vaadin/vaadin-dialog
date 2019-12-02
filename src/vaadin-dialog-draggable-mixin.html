@@ -8,40 +8,45 @@
    * @polymerMixin
    * @memberof Vaadin
    */
-  Vaadin.DialogDraggableMixin = subclass => class VaadinDialogDraggableMixin extends subclass {
-    ready() {
-      super.ready();
-      this._addDraggableEventListeners();
-    }
+  Vaadin.DialogDraggableMixin = (subclass) =>
+    class VaadinDialogDraggableMixin extends subclass {
+      ready() {
+        super.ready();
+        this._originalBounds = {};
+        this._originalMouse = {};
+        this._startDrag = this._startDrag.bind(this);
+        this._drag = this._drag.bind(this);
+        this._stopDrag = this._stopDrag.bind(this);
+        this.$.overlay.$.overlay.addEventListener('mousedown', this._startDrag);
+      }
 
-    _addDraggableEventListeners() {
-      let originalBounds;
-      let originalMouse;
-      this._stopDrag = () => {
-        window.removeEventListener('mouseup', this._stopDrag);
-        window.removeEventListener('mousemove', this._drag);
-      };
-      this._drag = (e) => {
-        const top = originalBounds.top + (e.pageY - originalMouse.top);
-        const left = originalBounds.left + (e.pageX - originalMouse.left);
-        this._setBounds({top, left});
-      };
-      this._startDrag = (e) => {
+      _startDrag(e) {
         if (this.draggable && e.button === 0) {
           const isResizerContainer = e.target === this.$.overlay.$.resizerContainer;
           const isContentPart = e.target === this.$.overlay.$.content;
           if (isResizerContainer || isContentPart) {
             e.preventDefault();
             this._moveOverlayToTop();
-            originalBounds = this._getOverlayBounds();
-            originalMouse = {top: e.pageY, left: e.pageX};
+            this._originalBounds = this._getOverlayBounds();
+            this._originalMouse = {top: e.pageY, left: e.pageX};
             window.addEventListener('mouseup', this._stopDrag);
             window.addEventListener('mousemove', this._drag);
-            this._setBounds(originalBounds);
+            this._setBounds(this._originalBounds);
           }
         }
-      };
-      this.$.overlay.$.overlay.addEventListener('mousedown', this._startDrag);
-    }
-  };
+      }
+
+      _drag(e) {
+        if (this._mouseInWindow(e)) {
+          const top = this._originalBounds.top + (e.pageY - this._originalMouse.top);
+          const left = this._originalBounds.left + (e.pageX - this._originalMouse.left);
+          this._setBounds({top, left});
+        }
+      }
+
+      _stopDrag() {
+        window.removeEventListener('mouseup', this._stopDrag);
+        window.removeEventListener('mousemove', this._drag);
+      }
+    };
 </script>
