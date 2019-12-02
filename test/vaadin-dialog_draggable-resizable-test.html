@@ -136,10 +136,12 @@
 
         it('should not move to top if not modeless', () => {
           const dialogBounds = container.getBoundingClientRect();
-          const coords = {x: dialogBounds.left + 10, y: dialogBounds.top + 10};
           dialog1._moveOverlayToTop = sinon.spy();
           container.style.padding = '20px';
-          dispatchMouseEvent(container, 'mousedown', coords);
+          dispatchMouseEvent(container, 'mousedown', {
+            x: dialogBounds.left + 10,
+            y: dialogBounds.top + 10
+          });
           expect(dialog1._moveOverlayToTop).to.be.calledOnce;
           expect(document.body.lastChild).to.not.eql(dialog1.$.overlay);
         });
@@ -321,10 +323,19 @@
           expect(Math.floor(resizedBounds.width)).to.be.eql(Math.floor(bounds.width));
           expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(bounds.height));
         });
+
+        it('should snap to pixels only once', () => {
+          dialog._setBounds = sinon.spy();
+          const coords = {x: 0, y: 0};
+          dispatchMouseEvent(overlayPart.querySelector('.n'), 'mousedown', coords);
+          dialog.$.overlay.$.overlay.style.position = 'absolute';
+          dispatchMouseEvent(overlayPart.querySelector('.n'), 'mousedown', coords);
+          expect(dialog._setBounds).to.be.calledOnce;
+        });
       });
 
       describe('draggable', () => {
-        var dialog, container, button, bounds, dx;
+        var dialog, container, content, button, bounds, dx;
 
         function drag(target, mouseButton = 0) {
           const bounds = target.getBoundingClientRect();
@@ -342,6 +353,7 @@
         beforeEach(() => {
           dialog = fixture('draggable');
           container = dialog.$.overlay.$.resizerContainer;
+          content = dialog.$.overlay.$.content;
           button = dialog.$.overlay.querySelector('button');
           bounds = container.getBoundingClientRect();
           dx = 100;
@@ -355,7 +367,7 @@
         });
 
         it('should drag and move dialog if mousedown on [part="content"]', () => {
-          drag(dialog.$.overlay.$.content);
+          drag(content);
           const draggedBounds = container.getBoundingClientRect();
           expect(Math.floor(draggedBounds.top)).to.be.eql(Math.floor(bounds.top + dx));
           expect(Math.floor(draggedBounds.left)).to.be.eql(Math.floor(bounds.left + dx));
@@ -376,10 +388,27 @@
         });
 
         it('should not drag dialog if mousedown not on [part="content"] or .resizer-container', () => {
-          drag(dialog.$.overlay.$.content.querySelector('slot'));
+          drag(content.querySelector('slot'));
           const draggedBounds = container.getBoundingClientRect();
           expect(Math.floor(draggedBounds.top)).to.be.eql(Math.floor(bounds.top));
           expect(Math.floor(draggedBounds.left)).to.be.eql(Math.floor(bounds.left));
+        });
+
+        it('should not drag dialog if mousedown on .resizer-container scrollbar', () => {
+          dialog._setBounds(dialog._getOverlayBounds());
+          dialog._moveOverlayToTop = sinon.spy();
+          content.style.width = content.clientWidth * 4 + 'px';
+          const scrollbarHeight = container.offsetHeight - container.clientHeight;
+          const containerBounds = container.getBoundingClientRect();
+          dispatchMouseEvent(container, 'mousedown', {
+            x: containerBounds.left + (containerBounds.width / 2),
+            y: containerBounds.top + containerBounds.height - (scrollbarHeight / 2)
+          });
+          if (scrollbarHeight) {
+            expect(dialog._moveOverlayToTop).not.to.be.called;
+          } else {
+            expect(dialog._moveOverlayToTop).to.be.calledOnce;
+          }
         });
 
         it('should not drag dialog if not left mouse button', () => {
@@ -397,13 +426,12 @@
         });
 
         it('should remove mousemove and mouseup event handlers after drag', () => {
-          const content = dialog.$.overlay.$.content;
-          const xy = {x: 0, y: 0};
+          const coords = {x: 0, y: 0};
           drag(content);
           dialog._drag = sinon.spy();
           dialog._stopDrag = sinon.spy();
-          dispatchMouseEvent(content, 'mousemove', xy);
-          dispatchMouseEvent(content, 'mouseup', xy);
+          dispatchMouseEvent(content, 'mousemove', coords);
+          dispatchMouseEvent(content, 'mouseup', coords);
           expect(dialog._drag).not.to.be.called;
           expect(dialog._stopDrag).not.to.be.called;
         });
@@ -416,6 +444,15 @@
           expect(Math.floor(draggedBounds.left)).to.be.eql(Math.floor(bounds.left));
           expect(Math.floor(draggedBounds.width)).to.be.eql(Math.floor(bounds.width));
           expect(Math.floor(draggedBounds.height)).to.be.eql(Math.floor(bounds.height));
+        });
+
+        it('should snap to pixels only once', () => {
+          dialog._setBounds = sinon.spy();
+          const coords = {x: 0, y: 0};
+          dispatchMouseEvent(content, 'mousedown', coords);
+          dialog.$.overlay.$.overlay.style.position = 'absolute';
+          dispatchMouseEvent(content, 'mousedown', coords);
+          expect(dialog._setBounds).to.be.calledOnce;
         });
       });
   </script>
