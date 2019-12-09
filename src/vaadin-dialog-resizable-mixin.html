@@ -6,6 +6,11 @@
         overflow: visible;
       }
 
+      [part='content'] {
+        box-sizing: border-box;
+        height: 100%;
+      }
+
       .resizer-container {
         height: 100%;
         overflow: auto;
@@ -31,49 +36,49 @@
       .resizer.edge.n {
         width: auto;
         bottom: auto;
-        cursor: n-resize;
+        cursor: ns-resize;
       }
 
       .resizer.ne {
         top: -5px;
         right: -5px;
-        cursor: ne-resize;
+        cursor: nesw-resize;
       }
 
       .resizer.edge.e {
         height: auto;
         left: auto;
-        cursor: e-resize;
+        cursor: ew-resize;
       }
 
       .resizer.se {
         bottom: -5px;
         right: -5px;
-        cursor: se-resize;
+        cursor: nwse-resize;
       }
 
       .resizer.edge.s {
         width: auto;
         top: auto;
-        cursor: s-resize;
+        cursor: ns-resize;
       }
 
       .resizer.sw {
         bottom: -5px;
         left: -5px;
-        cursor: sw-resize;
+        cursor: nesw-resize;
       }
 
       .resizer.edge.w {
         height: auto;
         right: auto;
-        cursor: w-resize;
+        cursor: ew-resize;
       }
 
       .resizer.nw {
         top: -5px;
         left: -5px;
-        cursor: nw-resize;
+        cursor: nwse-resize;
       }
     </style>
   </template>
