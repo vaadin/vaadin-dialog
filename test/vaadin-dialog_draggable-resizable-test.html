@@ -57,7 +57,7 @@
   </test-fixture>
 
   <script>
-      function dispatchMouseEvent(target, type, coords, button = 0) {
+      function dispatchMouseEvent(target, type, coords = {x: 0, y: 0}, button = 0) {
         const e = new MouseEvent(type, {
           view: window,
           bubbles: true,
@@ -83,6 +83,7 @@
         dispatchMouseEvent(target, 'mousemove', toXY, mouseButton);
         dispatchMouseEvent(target, 'mouseup', toXY, mouseButton);
       }
+
       describe('helper methods', () => {
         var dialogs, dialog1, dialog2, overlay, overlayPart, container;
 
@@ -105,87 +106,23 @@
         });
 
         it('should move dialog to top when dragged', () => {
-          const onClick = sinon.spy();
-          const dialog1Bounds = container.getBoundingClientRect();
-          const coords = {x: dialog1Bounds.left + 10, y: dialog1Bounds.top + 10};
-          container.addEventListener('click', onClick);
-          container.style.padding = '20px';
           expect(document.body.lastChild).to.eql(dialog2.$.overlay);
-          dispatchMouseEvent(overlay.$.content, 'mousedown', coords);
+          dispatchMouseEvent(overlay.$.content, 'mousedown');
           expect(document.body.lastChild).to.eql(dialog1.$.overlay);
-          document.elementFromPoint(coords.x, coords.y).click();
-          expect(onClick).to.be.calledOnce;
         });
 
         it('should move dialog to top when resized', () => {
-          const onClick = sinon.spy();
           const resizer = overlayPart.querySelector('.n');
-          const resizerBounds = container.getBoundingClientRect();
-          const coords = {
-            x: resizerBounds.left + (resizerBounds.width / 2),
-            y: resizerBounds.top + (resizerBounds.height / 2)
-          };
-          container.addEventListener('click', onClick);
-          container.style.padding = '20px';
           expect(document.body.lastChild).to.eql(dialog2.$.overlay);
-          dispatchMouseEvent(resizer, 'mousedown', coords);
+          dispatchMouseEvent(resizer, 'mousedown');
           expect(document.body.lastChild).to.eql(dialog1.$.overlay);
-          document.elementFromPoint(coords.x, coords.y).click();
-          expect(onClick).to.be.calledOnce;
         });
 
         it('should not move to top if not modeless', () => {
-          const dialogBounds = container.getBoundingClientRect();
           dialog1._moveOverlayToTop = sinon.spy();
-          container.style.padding = '20px';
-          dispatchMouseEvent(container, 'mousedown', {
-            x: dialogBounds.left + 10,
-            y: dialogBounds.top + 10
-          });
+          dispatchMouseEvent(container, 'mousedown');
           expect(dialog1._moveOverlayToTop).to.be.calledOnce;
           expect(document.body.lastChild).to.not.eql(dialog1.$.overlay);
-        });
-      });
-
-      describe('modeless', () => {
-        var dialog, overlay, backdrop;
-
-        beforeEach(() => {
-          dialog = fixture('default');
-          overlay = dialog.$.overlay;
-          backdrop = overlay.$.backdrop;
-        });
-
-        it('should be modal by default', () => {
-          expect(dialog.$.overlay.modeless).to.eql(false);
-          expect(dialog.$.overlay.$.backdrop.hidden).to.eql(false);
-        });
-
-        it('should not be modal when modeless is true', () => {
-          dialog.modeless = true;
-          expect(overlay.modeless).to.eql(true);
-          expect(backdrop.hidden).to.eql(true);
-        });
-      });
-
-      describe('modeless', () => {
-        var dialog, overlay, backdrop;
-
-        beforeEach(() => {
-          dialog = fixture('default');
-          overlay = dialog.$.overlay;
-          backdrop = overlay.$.backdrop;
-        });
-
-        it('should be modal by default', () => {
-          expect(dialog.$.overlay.modeless).to.eql(false);
-          expect(dialog.$.overlay.$.backdrop.hidden).to.eql(false);
-        });
-
-        it('should not be modal when modeless is true', () => {
-          dialog.modeless = true;
-          expect(overlay.modeless).to.eql(true);
-          expect(backdrop.hidden).to.eql(true);
         });
       });
 
@@ -216,7 +153,7 @@
         beforeEach(() => {
           dialog = fixture('resizable');
           overlayPart = dialog.$.overlay.$.overlay;
-          dialog.$.overlay.$.overlay.style.padding = '20px';
+          dialog.$.overlay.$.content.style.padding = '20px';
           bounds = overlayPart.getBoundingClientRect();
           dx = 20;
         });
@@ -293,6 +230,16 @@
           expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(bounds.height));
         });
 
+        it('should resize content part when the overlay is resized', () => {
+          resize(overlayPart.querySelector('.w'), -dx, 0);
+          const resizedBounds = overlayPart.getBoundingClientRect();
+          const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
+          expect(Math.floor(resizedBounds.top)).to.be.eql(Math.floor(contentPartBounds.top));
+          expect(Math.floor(resizedBounds.left)).to.be.eql(Math.floor(contentPartBounds.left));
+          expect(Math.floor(resizedBounds.width)).to.be.eql(Math.floor(contentPartBounds.width));
+          expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(contentPartBounds.height));
+        });
+
         it('should not resize dialog if not left mouse button', () => {
           resize(overlayPart.querySelector('.w'), -dx, 0, 1);
           const resizedBounds = overlayPart.getBoundingClientRect();
@@ -304,12 +251,11 @@
 
         it('should remove mousemove and mouseup event handlers after resize', () => {
           const resizer = overlayPart.querySelector('.n');
-          const xy = {x: 0, y: 0};
           resize(resizer, 0, -dx);
           dialog._resizeListeners.resize['n'] = sinon.spy();
           dialog._resizeListeners.stop['n'] = sinon.spy();
-          dispatchMouseEvent(resizer, 'mousemove', xy);
-          dispatchMouseEvent(resizer, 'mouseup', xy);
+          dispatchMouseEvent(resizer, 'mousemove');
+          dispatchMouseEvent(resizer, 'mouseup');
           expect(dialog._resizeListeners.resize['n']).not.to.be.called;
           expect(dialog._resizeListeners.stop['n']).not.to.be.called;
         });
@@ -326,10 +272,9 @@
 
         it('should snap to pixels only once', () => {
           dialog._setBounds = sinon.spy();
-          const coords = {x: 0, y: 0};
-          dispatchMouseEvent(overlayPart.querySelector('.n'), 'mousedown', coords);
+          dispatchMouseEvent(overlayPart.querySelector('.n'), 'mousedown');
           dialog.$.overlay.$.overlay.style.position = 'absolute';
-          dispatchMouseEvent(overlayPart.querySelector('.n'), 'mousedown', coords);
+          dispatchMouseEvent(overlayPart.querySelector('.n'), 'mousedown');
           expect(dialog._setBounds).to.be.calledOnce;
         });
       });
@@ -426,12 +371,11 @@
         });
 
         it('should remove mousemove and mouseup event handlers after drag', () => {
-          const coords = {x: 0, y: 0};
           drag(content);
           dialog._drag = sinon.spy();
           dialog._stopDrag = sinon.spy();
-          dispatchMouseEvent(content, 'mousemove', coords);
-          dispatchMouseEvent(content, 'mouseup', coords);
+          dispatchMouseEvent(content, 'mousemove');
+          dispatchMouseEvent(content, 'mouseup');
           expect(dialog._drag).not.to.be.called;
           expect(dialog._stopDrag).not.to.be.called;
         });
@@ -448,10 +392,9 @@
 
         it('should snap to pixels only once', () => {
           dialog._setBounds = sinon.spy();
-          const coords = {x: 0, y: 0};
-          dispatchMouseEvent(content, 'mousedown', coords);
+          dispatchMouseEvent(content, 'mousedown');
           dialog.$.overlay.$.overlay.style.position = 'absolute';
-          dispatchMouseEvent(content, 'mousedown', coords);
+          dispatchMouseEvent(content, 'mousedown');
           expect(dialog._setBounds).to.be.calledOnce;
         });
       });
