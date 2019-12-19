@@ -270,6 +270,14 @@
           expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(bounds.height));
         });
 
+        it('should be able to resize dialog to be wider than window', () => {
+          dialog._setBounds({left: -dx});
+          dx = Math.floor(window.innerWidth - bounds.width + 5);
+          resize(overlayPart.querySelector('.e'), dx, 0);
+          const resizedBounds = overlayPart.getBoundingClientRect();
+          expect(Math.floor(resizedBounds.width)).to.be.eql(Math.floor(bounds.width + dx));
+        });
+
         it('should snap to pixels only once', () => {
           dialog._setBounds = sinon.spy();
           dispatchMouseEvent(overlayPart.querySelector('.n'), 'mousedown');

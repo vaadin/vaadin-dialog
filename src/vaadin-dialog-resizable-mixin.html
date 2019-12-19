@@ -22,15 +22,17 @@
 
       .resizer {
         position: absolute;
-        height: 10px;
-        width: 10px;
+        height: 16px;
+        width: 16px;
       }
 
       .resizer.edge {
-        top: -5px;
-        right: -5px;
-        bottom: -5px;
-        left: -5px;
+        height: 8px;
+        width: 8px;
+        top: -4px;
+        right: -4px;
+        bottom: -4px;
+        left: -4px;
       }
 
       .resizer.edge.n {
@@ -40,8 +42,8 @@
       }
 
       .resizer.ne {
-        top: -5px;
-        right: -5px;
+        top: -8px;
+        right: -8px;
         cursor: nesw-resize;
       }
 
@@ -52,8 +54,8 @@
       }
 
       .resizer.se {
-        bottom: -5px;
-        right: -5px;
+        bottom: -8px;
+        right: -8px;
         cursor: nwse-resize;
       }
 
@@ -64,8 +66,8 @@
       }
 
       .resizer.sw {
-        bottom: -5px;
-        left: -5px;
+        bottom: -8px;
+        left: -8px;
         cursor: nesw-resize;
       }
 
@@ -76,8 +78,8 @@
       }
 
       .resizer.nw {
-        top: -5px;
-        left: -5px;
+        top: -8px;
+        left: -8px;
         cursor: nwse-resize;
       }
     </style>
@@ -94,12 +96,12 @@
    * @polymerMixin
    * @memberof Vaadin
    */
-  Vaadin.DialogResizableMixin = (subclass) =>
-    class VaadinDialogResizableMixin extends subclass {
+  Vaadin.DialogResizableMixin = (superClass) =>
+    class VaadinDialogResizableMixin extends superClass {
       ready() {
         super.ready();
         this._originalBounds = {};
-        this._originalMouse = {};
+        this._originalMouseCoords = {};
         this._resizeListeners = {start: {}, resize: {}, stop: {}};
         this._addResizeListeners();
       }
@@ -123,11 +125,9 @@
 
       _startResize(e, direction) {
         if (e.button === 0) {
-          e.preventDefault();
-          e.stopPropagation();
           this._moveOverlayToTop();
           this._originalBounds = this._getOverlayBounds();
-          this._originalMouse = {top: e.pageY, left: e.pageX};
+          this._originalMouseCoords = {top: e.pageY, left: e.pageX};
           window.addEventListener('mousemove', this._resizeListeners.resize[direction]);
           window.addEventListener('mouseup', this._resizeListeners.stop[direction]);
           if (this.$.overlay.$.overlay.style.position !== 'absolute') {
@@ -142,30 +142,30 @@
           resizer.split('').forEach((direction) => {
             switch (direction) {
               case 'n': {
-                const height = this._originalBounds.height - (e.pageY - this._originalMouse.top);
-                const top = this._originalBounds.top + (e.pageY - this._originalMouse.top);
+                const height = this._originalBounds.height - (e.pageY - this._originalMouseCoords.top);
+                const top = this._originalBounds.top + (e.pageY - this._originalMouseCoords.top);
                 if (height > minimumSize) {
                   this._setBounds({top, height});
                 }
                 break;
               }
               case 'e': {
-                const width = this._originalBounds.width + (e.pageX - this._originalMouse.left);
+                const width = this._originalBounds.width + (e.pageX - this._originalMouseCoords.left);
                 if (width > minimumSize) {
                   this._setBounds({width});
                 }
                 break;
               }
               case 's': {
-                const height = this._originalBounds.height + (e.pageY - this._originalMouse.top);
+                const height = this._originalBounds.height + (e.pageY - this._originalMouseCoords.top);
                 if (height > minimumSize) {
                   this._setBounds({height});
                 }
                 break;
               }
               case 'w': {
-                const width = this._originalBounds.width - (e.pageX - this._originalMouse.left);
-                const left = this._originalBounds.left + (e.pageX - this._originalMouse.left);
+                const width = this._originalBounds.width - (e.pageX - this._originalMouseCoords.left);
+                const left = this._originalBounds.left + (e.pageX - this._originalMouseCoords.left);
                 if (width > minimumSize) {
                   this._setBounds({left, width});
                 }
