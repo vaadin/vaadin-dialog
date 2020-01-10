@@ -36,6 +36,11 @@
             if (this.$.overlay.$.overlay.style.position !== 'absolute') {
               this._setBounds(this._originalBounds);
             }
+          } else if (!isResizerContainerScrollbar) {
+            // This is needed because _moveOverlayToTop cancels child mouse events
+            // that are fired after this one, due to removing the overlay from the DOM.
+            e.target.click();
+            this._moveOverlayToTop();
           }
         }
       }

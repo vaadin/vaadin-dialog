@@ -111,6 +111,13 @@
           expect(document.body.lastChild).to.eql(dialog1.$.overlay);
         });
 
+        it('should move dialog to top when clicking content', () => {
+          const div = overlay.querySelector('div');
+          expect(document.body.lastChild).to.eql(dialog2.$.overlay);
+          dispatchMouseEvent(div, 'mousedown');
+          expect(document.body.lastChild).to.eql(dialog1.$.overlay);
+        });
+
         it('should move dialog to top when resized', () => {
           const resizer = overlayPart.querySelector('.n');
           expect(document.body.lastChild).to.eql(dialog2.$.overlay);
