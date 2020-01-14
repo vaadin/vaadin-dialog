@@ -38,7 +38,7 @@ This program is available under Apache License Version 2.0, available at https:/
 
     <vaadin-dialog-overlay id="overlay"
       on-opened-changed="_onOverlayOpened"
-      on-click="_moveOverlayToTop"
+      on-mousedown="_bringOverlayToFront"
       theme$="[[theme]]"
       modeless="[[modeless]]"
       with-backdrop="[[!modeless]]"
@@ -83,6 +83,14 @@ This program is available under Apache License Version 2.0, available at https:/
             overlayPart.appendChild(resizerContainer);
           }
           return memoizedTemplate;
+        }
+
+        static get properties() {
+          return {
+            modeless: Boolean,
+
+            withBackdrop: Boolean
+          };
         }
       }
 
@@ -361,10 +369,8 @@ This program is available under Apache License Version 2.0, available at https:/
           Object.assign(overlay.style, parsedBounds);
         }
 
-        _moveOverlayToTop() {
-          if (this.modeless && document.body.lastElementChild !== this.$.overlay) {
-            document.body.appendChild(this.$.overlay);
-          }
+        _bringOverlayToFront() {
+          this.$.overlay.bringToFront();
         }
 
         _getOverlayBounds() {

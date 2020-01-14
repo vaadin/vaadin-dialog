@@ -28,7 +28,6 @@
           const isContentPart = e.target === this.$.overlay.$.content;
           if ((isResizerContainer && !isResizerContainerScrollbar) || isContentPart) {
             e.preventDefault();
-            this._moveOverlayToTop();
             this._originalBounds = this._getOverlayBounds();
             this._originalMouseCoords = {top: e.pageY, left: e.pageX};
             window.addEventListener('mouseup', this._stopDrag);

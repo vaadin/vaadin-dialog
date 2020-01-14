@@ -125,7 +125,6 @@
 
       _startResize(e, direction) {
         if (e.button === 0) {
-          this._moveOverlayToTop();
           this._originalBounds = this._getOverlayBounds();
           this._originalMouseCoords = {top: e.pageY, left: e.pageX};
           window.addEventListener('mousemove', this._resizeListeners.resize[direction]);
