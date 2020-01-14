@@ -106,30 +106,30 @@
         });
 
         it('should move dialog to top when dragged', () => {
-          expect(document.body.lastChild).to.eql(dialog2.$.overlay);
+          expect(dialog2.$.overlay._last).to.be.true;
           dispatchMouseEvent(overlay.$.content, 'mousedown');
-          expect(document.body.lastChild).to.eql(dialog1.$.overlay);
+          expect(dialog1.$.overlay._last).to.be.true;
         });
 
         it('should move dialog to top when content is clicked', () => {
           const div = overlay.querySelector('div');
-          expect(document.body.lastChild).to.eql(dialog2.$.overlay);
+          expect(dialog2.$.overlay._last).to.be.true;
           dispatchMouseEvent(div, 'mousedown');
-          expect(document.body.lastChild).to.eql(dialog1.$.overlay);
+          expect(dialog1.$.overlay._last).to.be.true;
         });
 
         it('should move dialog to top when resized', () => {
           const resizer = overlayPart.querySelector('.n');
-          expect(document.body.lastChild).to.eql(dialog2.$.overlay);
+          expect(dialog2.$.overlay._last).to.be.true;
           dispatchMouseEvent(resizer, 'mousedown');
-          expect(document.body.lastChild).to.eql(dialog1.$.overlay);
+          expect(dialog1.$.overlay._last).to.be.true;
         });
 
         it('should not move to top if not modeless', () => {
           dialog1._bringOverlayToFront = sinon.spy();
           dispatchMouseEvent(container, 'mousedown');
           expect(dialog1._bringOverlayToFront).to.be.calledOnce;
-          expect(document.body.lastChild).to.not.eql(dialog1.$.overlay);
+          expect(dialog1.$.overlay._last).to.be.false;
         });
       });
 
@@ -355,8 +355,7 @@
         });
 
         it('should not drag dialog if mousedown on .resizer-container scrollbar', () => {
-          dialog._setBounds(dialog._getOverlayBounds());
-          dialog._bringOverlayToFront = sinon.spy();
+          const boundsSpy = sinon.spy(dialog, '_setBounds');
           content.style.width = content.clientWidth * 4 + 'px';
           const scrollbarHeight = container.offsetHeight - container.clientHeight;
           const containerBounds = container.getBoundingClientRect();
@@ -365,9 +364,9 @@
             y: containerBounds.top + containerBounds.height - (scrollbarHeight / 2)
           });
           if (scrollbarHeight) {
-            expect(dialog._bringOverlayToFront).not.to.be.called;
+            expect(boundsSpy).not.to.be.called;
           } else {
-            expect(dialog._bringOverlayToFront).to.be.calledOnce;
+            expect(boundsSpy).to.be.calledOnce;
           }
         });
 
