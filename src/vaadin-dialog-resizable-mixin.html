@@ -137,6 +137,7 @@
       }
 
       _resize(e, resizer) {
+        e.preventDefault();
         if (this._mouseInWindow(e)) {
           const minimumSize = 40;
           resizer.split('').forEach((direction) => {
