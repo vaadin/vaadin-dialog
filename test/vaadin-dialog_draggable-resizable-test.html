@@ -10,6 +10,13 @@
 </head>
 
 <body>
+  <style>
+    /* Hack for Safari to make the overlay take full size */
+    vaadin-dialog-overlay[opening] {
+      animation: 0 foo;
+    }
+  </style>
+
   <test-fixture id="default">
     <template>
       <vaadin-dialog opened>
