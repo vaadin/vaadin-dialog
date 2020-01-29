@@ -193,40 +193,16 @@
         window.removeEventListener('touchmove', this._resizeListeners.resize[direction]);
         window.removeEventListener('mouseup', this._resizeListeners.stop[direction]);
         window.removeEventListener('touchend', this._resizeListeners.stop[direction]);
-        const dim = this._getResizeDimensions();
-        this.dispatchEvent(
-          new CustomEvent('resize', {
-            detail: {
-              width: dim.overlay.width,
-              height: dim.overlay.height,
-              contentWidth: dim.content.width,
-              contentHeight: dim.content.height
-            }
-          })
-        );
+        this.dispatchEvent(new CustomEvent('resize', {detail: this._getResizeDimensions()}));
       }
 
       _getResizeDimensions() {
-        const overlay = this.$.overlay;
-        const overlayStyles = getComputedStyle(overlay.$.overlay);
-        const contentStyles = getComputedStyle(overlay.$.content);
-        const verticalPadding =
-          parseInt(contentStyles.paddingTop) +
-          parseInt(contentStyles.paddingBottom) +
-          parseInt(contentStyles.borderTopWidth) +
-          parseInt(contentStyles.borderBottomWidth);
-
-        overlay.$.content.style.boxSizing = 'content-box';
-        overlay.$.content.style.height = `calc(100% - ${verticalPadding}px)`;
-
-        const dim = {
-          overlay: {width: overlayStyles.width, height: overlayStyles.height},
-          content: {width: contentStyles.width, height: contentStyles.height}
-        };
-
-        overlay.$.content.style.removeProperty('box-sizing');
-        overlay.$.content.style.height = '100%';
-        return dim;
+        const {width, height} = getComputedStyle(this.$.overlay.$.overlay);
+        const content = this.$.overlay.$.content;
+        content.setAttribute('style', 'position: absolute; top: 0; right: 0; bottom: 0; left: 0; box-sizing: content-box; height: auto;');
+        const {width: contentWidth, height: contentHeight} = getComputedStyle(content);
+        content.removeAttribute('style');
+        return {width, height, contentWidth, contentHeight};
       }
     };
 </script>
