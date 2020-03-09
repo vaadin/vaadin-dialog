@@ -44,7 +44,7 @@
 
   <test-fixture id="resizable">
     <template>
-      <vaadin-dialog resizable opened>
+      <vaadin-dialog resizable opened modeless>
         <template>
           <div>Resizable dialog</div>
         </template>
@@ -54,13 +54,20 @@
 
   <test-fixture id="draggable">
     <template>
-      <vaadin-dialog draggable opened>
+      <vaadin-dialog draggable opened modeless>
         <template>
           <div>Draggable dialog</div>
           <div class="draggable">Draggable area</div>
           <button>OK</button>
         </template>
       </vaadin-dialog>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="bring-to-front">
+    <template>
+      <vaadin-dialog id="modalDialog"></vaadin-dialog>
+      <vaadin-dialog id="modelessDialog" modeless></vaadin-dialog>
     </template>
   </test-fixture>
 
@@ -134,9 +141,10 @@
         });
 
         it('should not move to top if not modeless', () => {
-          dialog1._bringOverlayToFront = sinon.spy();
+          dialog1.modeless = false;
+          sinon.spy(dialog1.$.overlay, 'bringToFront');
           dispatchMouseEvent(container, 'mousedown');
-          expect(dialog1._bringOverlayToFront).to.be.calledOnce;
+          expect(dialog1.$.overlay.bringToFront).to.not.be.called;
           expect(dialog1.$.overlay._last).to.be.false;
         });
       });
@@ -573,6 +581,32 @@
           expect(removeSpy.called).to.be.false;
         });
 
+      });
+
+      // This also covers use-case of a overlay element (eg. combo-box) inside
+      // of a modal dialog
+      describe('modal and modeless dialog together', () => {
+        let modalDialog, modelessDialog;
+        beforeEach(() => {
+          const dialogs = fixture('bring-to-front');
+          modalDialog = dialogs[0];
+          modelessDialog = dialogs[1];
+        });
+
+        it('modal should not bring to front and close if a modeless dialog is on top', () => {
+          modalDialog.opened = true;
+          modelessDialog.opened = true;
+
+          const modalBackdrop = modalDialog.$.overlay.$.backdrop;
+
+          expect(modalDialog.$.overlay._last).to.be.false;
+
+          dispatchMouseEvent(modalBackdrop, 'mousedown');
+          dispatchMouseEvent(modalBackdrop, 'click');
+
+          expect(modalDialog.$.overlay._last).to.be.false;
+          expect(modalDialog.opened).to.be.true;
+        });
       });
   </script>
 </body>
