@@ -605,18 +605,18 @@
           modalDialog.opened = true;
           modelessDialog.opened = true;
 
-          const expectedTextContent = modelessDialog.$.overlay.innerText;
+          const expectedTextContent = modelessDialog.$.overlay.innerText.trim();
 
           const windowCenterHeight = window.innerHeight / 2;
           const windowCenterWidth = window.innerWidth / 2;
-          let actualTextContent = document.elementFromPoint(windowCenterWidth, windowCenterHeight).innerText;
+          let actualTextContent = document.elementFromPoint(windowCenterWidth, windowCenterHeight).innerText.trim();
           expect(actualTextContent).to.be.equals(expectedTextContent);
 
           const modalBackdrop = modalDialog.$.overlay.$.backdrop;
           dispatchMouseEvent(modalBackdrop, 'mousedown');
           dispatchMouseEvent(modalBackdrop, 'click');
 
-          actualTextContent = document.elementFromPoint(windowCenterWidth, windowCenterHeight).innerText;
+          actualTextContent = document.elementFromPoint(windowCenterWidth, windowCenterHeight).innerText.trim();
           expect(actualTextContent).to.be.eql(expectedTextContent);
           expect(modalDialog.opened).to.be.true;
         });
