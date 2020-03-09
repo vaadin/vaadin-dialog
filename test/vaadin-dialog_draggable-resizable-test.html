@@ -66,8 +66,16 @@
 
   <test-fixture id="bring-to-front">
     <template>
-      <vaadin-dialog id="modalDialog"></vaadin-dialog>
-      <vaadin-dialog id="modelessDialog" modeless></vaadin-dialog>
+      <vaadin-dialog id="modalDialog">
+        <template>
+          MODAL_DIALOG
+        </template>
+      </vaadin-dialog>
+      <vaadin-dialog id="modelessDialog" modeless>
+        <template>
+          MODELESS_DIALOG
+        </template>
+      </vaadin-dialog>
     </template>
   </test-fixture>
 
@@ -597,14 +605,19 @@
           modalDialog.opened = true;
           modelessDialog.opened = true;
 
+          const expectedTextContent = modelessDialog.$.overlay.innerText;
+
+          const windowCenterHeight = window.innerHeight / 2;
+          const windowCenterWidth = window.innerWidth / 2;
+          let actualTextContent = document.elementFromPoint(windowCenterWidth, windowCenterHeight).innerText;
+          expect(actualTextContent).to.be.equals(expectedTextContent);
+
           const modalBackdrop = modalDialog.$.overlay.$.backdrop;
-
-          expect(modalDialog.$.overlay._last).to.be.false;
-
           dispatchMouseEvent(modalBackdrop, 'mousedown');
           dispatchMouseEvent(modalBackdrop, 'click');
 
-          expect(modalDialog.$.overlay._last).to.be.false;
+          actualTextContent = document.elementFromPoint(windowCenterWidth, windowCenterHeight).innerText;
+          expect(actualTextContent).to.be.eql(expectedTextContent);
           expect(modalDialog.opened).to.be.true;
         });
       });
