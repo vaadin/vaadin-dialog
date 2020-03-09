@@ -584,9 +584,9 @@
 
         it('should resize dialog from top right corner', () => {
           const d = 100;
-          const bounds = resizableContainer.getBoundingClientRect();
+          const bounds = resizableOverlayPart.getBoundingClientRect();
           touchResize(resizableOverlayPart.querySelector('.ne'), d, -d);
-          const resizedBounds = resizableContainer.getBoundingClientRect();
+          const resizedBounds = resizableOverlayPart.getBoundingClientRect();
           expect(Math.floor(resizedBounds.top)).to.be.eql(Math.floor(bounds.top - d));
           expect(Math.floor(resizedBounds.left)).to.be.eql(Math.floor(bounds.left));
           expect(Math.floor(resizedBounds.width)).to.be.eql(Math.floor(bounds.width + d));
