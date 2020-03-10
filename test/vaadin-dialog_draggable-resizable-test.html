@@ -546,7 +546,7 @@
           expect(getFrontmostOverlayFromScreenCenter()).to.equal(resizableOverlay);
         });
 
-        it('should not move dialog if there more then two fingers used', () => {
+        it('should not move dialog if there more than two fingers used', () => {
           const d = 1;
           const bounds = draggableContainer.getBoundingClientRect();
           touchDrag(draggableContainer, d, d, true);
@@ -555,7 +555,7 @@
             expect(Math.floor(draggedBounds[prop])).to.be.eql(Math.floor(bounds[prop])));
         });
 
-        it('should not resize dialog if there more then two fingers used', () => {
+        it('should not resize dialog if there more than two fingers used', () => {
           const d = 100;
           const bounds = resizableContainer.getBoundingClientRect();
           touchResize(resizableOverlayPart.querySelector('.ne'), d, -d, true);
