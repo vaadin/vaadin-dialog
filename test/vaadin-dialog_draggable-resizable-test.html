@@ -479,6 +479,7 @@
       });
 
       describe('touch', () => {
+        const MOBILE = /iPad|iPhone|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
 
         function dispatchTouchEvent(target, type, coords = {x: 0, y: 0}, multitouch = false) {
           const e = new CustomEvent(type, {
@@ -550,6 +551,11 @@
           resizableOverlayPart = resizableOverlay.$.overlay;
           resizable.opened = true;
           draggable.opened = true;
+        });
+
+        (!MOBILE ? it : it.skip)('should prevent default of the touchstart when dragged on desktop', () => {
+          const e = dispatchTouchEvent(draggableOverlay.$.content, 'touchstart');
+          expect(e.defaultPrevented).to.be.true;
         });
 
         it('should prevent default of the touchmove when dragged', () => {
