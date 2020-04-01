@@ -1,4 +1,13 @@
 <script>
+  const TOUCH_DEVICE = (() => {
+    try {
+      document.createEvent('TouchEvent');
+      return true;
+    } catch (e) {
+      return false;
+    }
+  })();
+
   /**
    * @namespace Vaadin
    */
@@ -10,6 +19,15 @@
    */
   Vaadin.DialogDraggableMixin = (superClass) =>
     class VaadinDialogDraggableMixin extends superClass {
+      static get properties() {
+        return {
+          _touchDevice: {
+            type: Boolean,
+            value: TOUCH_DEVICE
+          }
+        };
+      }
+
       ready() {
         super.ready();
         this._originalBounds = {};
@@ -19,8 +37,6 @@
         this._stopDrag = this._stopDrag.bind(this);
         this.$.overlay.$.overlay.addEventListener('mousedown', this._startDrag);
         this.$.overlay.$.overlay.addEventListener('touchstart', this._startDrag);
-
-        this.__isMobile = /iPad|iPhone|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
       }
 
       _startDrag(e) {
@@ -32,7 +48,7 @@
           const isDraggable = e.target.classList.contains('draggable');
           if ((isResizerContainer && !isResizerContainerScrollbar) || isContentPart || isDraggable) {
             // Is needed to prevent text selection in Safari
-            !this.__isMobile && !isDraggable && e.preventDefault();
+            !this._touchDevice && !isDraggable && e.preventDefault();
             this._originalBounds = this._getOverlayBounds();
             const event = this.__getMouseOrFirstTouchEvent(e);
             this._originalMouseCoords = {top: event.pageY, left: event.pageX};
