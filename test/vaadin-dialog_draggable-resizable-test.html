@@ -558,6 +558,11 @@
           expect(e.defaultPrevented).to.be.true;
         });
 
+        it('should not prevent default of the touchmove events', () => {
+          const e = dispatchTouchEvent(draggableOverlay.$.content, 'touchmove');
+          expect(e.defaultPrevented).to.be.false;
+        });
+
         it('should bring to front on touch start', () => {
           dispatchTouchEvent(resizableContainer, 'touchstart');
           expect(getFrontmostOverlayFromScreenCenter()).to.equal(resizableOverlay);
