@@ -271,6 +271,22 @@
           expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(contentPartBounds.height));
         });
 
+        it('should resize content part when the overlay is expanded vertically', () => {
+          resize(overlayPart.querySelector('.s'), 0, 10);
+          const resizedBounds = overlayPart.getBoundingClientRect();
+          const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
+          expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(contentPartBounds.height));
+        });
+
+        it('should expand content if it overflows the overlay', () => {
+          // Fill the content with a lot of text so that it overflows the viewport
+          dialog.$.overlay.firstElementChild.innerText = Array.from(new Array(10000)).map(() => 'foo').join(' ');
+
+          const overlayBounds = overlayPart.getBoundingClientRect();
+          const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
+          expect(contentPartBounds.height).to.be.above(overlayBounds.height);
+        });
+
         it('should not resize dialog if not left mouse button', () => {
           resize(overlayPart.querySelector('.w'), -dx, 0, 1);
           const resizedBounds = overlayPart.getBoundingClientRect();
