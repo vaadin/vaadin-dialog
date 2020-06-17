@@ -165,13 +165,6 @@
         input.dispatchEvent(new CustomEvent('input'));
         expect(container.text).to.equal('bar');
       });
-
-      it('should scroll if the content overflows', () => {
-        container.message = Array.from(new Array(10000)).map(() => 'foo').join(' ');
-        const resizeContainer = overlay.$.resizerContainer;
-        resizeContainer.scrollTop = 1;
-        expect(resizeContainer.scrollTop).to.equal(1);
-      });
     });
   </script>
 </body>

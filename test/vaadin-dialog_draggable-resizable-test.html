@@ -298,9 +298,18 @@
           });
         });
 
+        it('should scroll if the content overflows', () => {
+          // Fill the content with a lot of text so that it overflows the viewport
+          dialog.$.overlay.firstElementChild.textContent = Array(...new Array(10000)).map(() => 'foo').join(' ');
+
+          const resizeContainer = dialog.$.overlay.$.resizerContainer;
+          resizeContainer.scrollTop = 1;
+          expect(resizeContainer.scrollTop).to.equal(1);
+        });
+
         it('should expand content if it overflows the overlay', () => {
           // Fill the content with a lot of text so that it overflows the viewport
-          dialog.$.overlay.firstElementChild.innerText = Array.from(new Array(10000)).map(() => 'foo').join(' ');
+          dialog.$.overlay.firstElementChild.textContent = Array(...new Array(10000)).map(() => 'foo').join(' ');
 
           const overlayBounds = overlayPart.getBoundingClientRect();
           const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
