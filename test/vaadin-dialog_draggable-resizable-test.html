@@ -107,6 +107,19 @@
         dispatchMouseEvent(target, 'mouseup', toXY, mouseButton);
       }
 
+      function waitUntil(condition) {
+        return new Promise((resolve) => {
+          const check = () => {
+            if (condition()) {
+              resolve();
+            } else {
+              setTimeout(check, 1);
+            }
+          };
+          check();
+        });
+      }
+
       describe('helper methods', () => {
         var dialogs, dialog1, dialog2, overlay, overlayPart, container;
 
@@ -263,19 +276,26 @@
 
         it('should resize content part when the overlay is resized', () => {
           resize(overlayPart.querySelector('.w'), -dx, 0);
-          const resizedBounds = overlayPart.getBoundingClientRect();
-          const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
-          expect(Math.floor(resizedBounds.top)).to.be.eql(Math.floor(contentPartBounds.top));
-          expect(Math.floor(resizedBounds.left)).to.be.eql(Math.floor(contentPartBounds.left));
-          expect(Math.floor(resizedBounds.width)).to.be.eql(Math.floor(contentPartBounds.width));
-          expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(contentPartBounds.height));
+
+          return waitUntil(() => {
+            const resizedBounds = overlayPart.getBoundingClientRect();
+            const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
+            return (Math.floor(resizedBounds.top) === Math.floor(contentPartBounds.top))
+              && (Math.floor(resizedBounds.left) === Math.floor(contentPartBounds.left))
+              && (Math.floor(resizedBounds.width) === Math.floor(contentPartBounds.width))
+              && (Math.floor(resizedBounds.height) === Math.floor(contentPartBounds.height));
+          });
+
         });
 
         it('should resize content part when the overlay is expanded vertically', () => {
           resize(overlayPart.querySelector('.s'), 0, 10);
-          const resizedBounds = overlayPart.getBoundingClientRect();
-          const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
-          expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(contentPartBounds.height));
+
+          return waitUntil(() => {
+            const resizedBounds = overlayPart.getBoundingClientRect();
+            const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
+            return Math.floor(resizedBounds.height) === Math.floor(contentPartBounds.height);
+          });
         });
 
         it('should expand content if it overflows the overlay', () => {
@@ -341,20 +361,26 @@
           dialog.addEventListener('resize', (e) => (detail = e.detail));
           resize(overlayPart.querySelector('.w'), -dx, 0);
 
-          const resizedBounds = overlayPart.getBoundingClientRect();
-          const contentStyles = getComputedStyle(content);
-          const verticalPadding =
-            parseInt(contentStyles.paddingTop) +
-            parseInt(contentStyles.paddingBottom) +
-            parseInt(contentStyles.borderTopWidth) +
-            parseInt(contentStyles.borderBottomWidth);
-          content.style.boxSizing = 'content-box';
+          return waitUntil(() => {
+            const resizedBounds = overlayPart.getBoundingClientRect();
+            const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
+            return Math.floor(resizedBounds.height) === Math.floor(contentPartBounds.height);
+          }).then(() => {
+            const resizedBounds = overlayPart.getBoundingClientRect();
+            const contentStyles = getComputedStyle(content);
+            const verticalPadding =
+              parseInt(contentStyles.paddingTop) +
+              parseInt(contentStyles.paddingBottom) +
+              parseInt(contentStyles.borderTopWidth) +
+              parseInt(contentStyles.borderBottomWidth);
+            content.style.boxSizing = 'content-box';
 
-          expect(onResize).to.be.calledOnce;
-          expect(Math.floor(resizedBounds.width)).to.be.eql(parseInt(detail.width));
-          expect(Math.floor(resizedBounds.height)).to.be.eql(parseInt(detail.height));
-          expect(parseInt(detail.contentWidth)).to.be.eql(parseInt(contentStyles.width));
-          expect(parseInt(detail.contentHeight)).to.be.eql(parseInt(contentStyles.height) - verticalPadding);
+            expect(onResize).to.be.calledOnce;
+            expect(Math.floor(resizedBounds.width)).to.be.eql(parseInt(detail.width));
+            expect(Math.floor(resizedBounds.height)).to.be.eql(parseInt(detail.height));
+            expect(parseInt(detail.contentWidth)).to.be.eql(parseInt(contentStyles.width));
+            expect(parseInt(detail.contentHeight)).to.be.eql(parseInt(contentStyles.height) - verticalPadding);
+          });
         });
       });
 
