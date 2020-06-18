@@ -107,7 +107,7 @@
         dispatchMouseEvent(target, 'mouseup', toXY, mouseButton);
       }
 
-      // This is needed to ensure iOS 10 Safari styles catch up after resize.
+      // This is needed to ensure styles on iOS 10 Safari catch up after resize.
       function contentStabilized(dialog) {
         return new Promise((resolve) => {
           const check = () => {
