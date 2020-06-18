@@ -107,10 +107,13 @@
         dispatchMouseEvent(target, 'mouseup', toXY, mouseButton);
       }
 
-      function waitUntil(condition) {
+      // This is needed to ensure iOS 10 Safari styles catch up after resize.
+      function contentStabilized(dialog) {
         return new Promise((resolve) => {
           const check = () => {
-            if (condition()) {
+            const resizedBounds = dialog.$.overlay.$.overlay.getBoundingClientRect();
+            const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
+            if (Math.floor(resizedBounds.height) === Math.floor(contentPartBounds.height)) {
               resolve();
             } else {
               setTimeout(check, 1);
@@ -274,28 +277,25 @@
           expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(bounds.height));
         });
 
-        it('should resize content part when the overlay is resized', () => {
+        it('should resize content part when the overlay is resized', async() => {
           resize(overlayPart.querySelector('.w'), -dx, 0);
+          await contentStabilized(dialog);
 
-          return waitUntil(() => {
-            const resizedBounds = overlayPart.getBoundingClientRect();
-            const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
-            return (Math.floor(resizedBounds.top) === Math.floor(contentPartBounds.top))
-              && (Math.floor(resizedBounds.left) === Math.floor(contentPartBounds.left))
-              && (Math.floor(resizedBounds.width) === Math.floor(contentPartBounds.width))
-              && (Math.floor(resizedBounds.height) === Math.floor(contentPartBounds.height));
-          });
-
+          const resizedBounds = overlayPart.getBoundingClientRect();
+          const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
+          expect(Math.floor(resizedBounds.top)).to.be.eql(Math.floor(contentPartBounds.top));
+          expect(Math.floor(resizedBounds.left)).to.be.eql(Math.floor(contentPartBounds.left));
+          expect(Math.floor(resizedBounds.width)).to.be.eql(Math.floor(contentPartBounds.width));
+          expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(contentPartBounds.height));
         });
 
-        it('should resize content part when the overlay is expanded vertically', () => {
+        it('should resize content part when the overlay is expanded vertically', async() => {
           resize(overlayPart.querySelector('.s'), 0, 10);
+          await contentStabilized(dialog);
 
-          return waitUntil(() => {
-            const resizedBounds = overlayPart.getBoundingClientRect();
-            const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
-            return Math.floor(resizedBounds.height) === Math.floor(contentPartBounds.height);
-          });
+          const resizedBounds = overlayPart.getBoundingClientRect();
+          const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
+          expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(contentPartBounds.height));
         });
 
         it('should scroll if the content overflows', () => {
@@ -362,34 +362,29 @@
           expect(dialog._setBounds).to.be.calledOnce;
         });
 
-        it('should dispatch resize event with correct details', () => {
+        it('should dispatch resize event with correct details', async() => {
           const onResize = sinon.spy();
           const content = dialog.$.overlay.$.content;
           let detail = {};
           dialog.addEventListener('resize', onResize);
           dialog.addEventListener('resize', (e) => (detail = e.detail));
           resize(overlayPart.querySelector('.w'), -dx, 0);
+          await contentStabilized(dialog);
 
-          return waitUntil(() => {
-            const resizedBounds = overlayPart.getBoundingClientRect();
-            const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
-            return Math.floor(resizedBounds.height) === Math.floor(contentPartBounds.height);
-          }).then(() => {
-            const resizedBounds = overlayPart.getBoundingClientRect();
-            const contentStyles = getComputedStyle(content);
-            const verticalPadding =
-              parseInt(contentStyles.paddingTop) +
-              parseInt(contentStyles.paddingBottom) +
-              parseInt(contentStyles.borderTopWidth) +
-              parseInt(contentStyles.borderBottomWidth);
-            content.style.boxSizing = 'content-box';
+          const resizedBounds = overlayPart.getBoundingClientRect();
+          const contentStyles = getComputedStyle(content);
+          const verticalPadding =
+            parseInt(contentStyles.paddingTop) +
+            parseInt(contentStyles.paddingBottom) +
+            parseInt(contentStyles.borderTopWidth) +
+            parseInt(contentStyles.borderBottomWidth);
+          content.style.boxSizing = 'content-box';
 
-            expect(onResize).to.be.calledOnce;
-            expect(Math.floor(resizedBounds.width)).to.be.eql(parseInt(detail.width));
-            expect(Math.floor(resizedBounds.height)).to.be.eql(parseInt(detail.height));
-            expect(parseInt(detail.contentWidth)).to.be.eql(parseInt(contentStyles.width));
-            expect(parseInt(detail.contentHeight)).to.be.eql(parseInt(contentStyles.height) - verticalPadding);
-          });
+          expect(onResize).to.be.calledOnce;
+          expect(Math.floor(resizedBounds.width)).to.be.eql(parseInt(detail.width));
+          expect(Math.floor(resizedBounds.height)).to.be.eql(parseInt(detail.height));
+          expect(parseInt(detail.contentWidth)).to.be.eql(parseInt(contentStyles.width));
+          expect(parseInt(detail.contentHeight)).to.be.eql(parseInt(contentStyles.height) - verticalPadding);
         });
       });
 
