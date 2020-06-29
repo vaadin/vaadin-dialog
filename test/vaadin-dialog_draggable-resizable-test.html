@@ -301,13 +301,13 @@
         const isIOS10 = ios && String(ios).indexOf('OS 10') > -1;
 
         if (!isIOS10) {
-          it("should support scrollable full size content", async () => {
+          it('should support scrollable full size content', async() => {
             const container = dialog.$.overlay.firstElementChild;
-            container.style.height = "100%";
-            container.style.width = "100%";
-            container.style.overflow = "auto";
-            container.textContent = Array(...new Array(10000)).map(() => "foo").join(" ");
-            
+            container.style.height = '100%';
+            container.style.width = '100%';
+            container.style.overflow = 'auto';
+            container.textContent = Array(...new Array(10000)).map(() => 'foo').join(' ');
+
             await contentStabilized(dialog);
 
             const resizeContainer = dialog.$.overlay.$.resizerContainer;
