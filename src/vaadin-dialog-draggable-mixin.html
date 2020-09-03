@@ -53,7 +53,7 @@
           const isResizerContainer = e.target === resizerContainer;
           const isResizerContainerScrollbar = e.offsetX > resizerContainer.clientWidth || e.offsetY > resizerContainer.clientHeight;
           const isContentPart = e.target === this.$.overlay.$.content;
-          const isDraggable = e.target.classList.contains('draggable');
+          const isDraggable = e.composedPath().some(node => node.classList && node.classList.contains('draggable'));
           if ((isResizerContainer && !isResizerContainerScrollbar) || isContentPart || isDraggable) {
             !isDraggable && e.preventDefault();
             this._originalBounds = this._getOverlayBounds();
