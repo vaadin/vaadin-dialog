@@ -1,7 +1,8 @@
-<link rel="import" href="../../../vaadin-material-styles/mixins/overlay.html">
-<link rel="import" href="../../../vaadin-material-styles/shadow.html">
+import '@vaadin/vaadin-material-styles/mixins/overlay.js';
+import '@vaadin/vaadin-material-styles/shadow.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
-<dom-module id="material-dialog" theme-for="vaadin-dialog-overlay">
+const $_documentContainer = html`<dom-module id="material-dialog" theme-for="vaadin-dialog-overlay">
   <template>
     <style include="material-overlay">
       [part="overlay"] {
@@ -17,4 +18,6 @@
       }
     </style>
   </template>
-</dom-module>
+</dom-module>`;
+
+document.head.appendChild($_documentContainer.content);
