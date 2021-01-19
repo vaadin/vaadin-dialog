@@ -93,12 +93,6 @@ $_documentContainer.innerHTML = `<dom-module id="vaadin-dialog-resizable-overlay
         left: -4px;
         cursor: nwse-resize;
       }
-
-      /* IE11 -only CSS */
-      _:-ms-fullscreen,
-      [part='overlay'] {
-        max-height: none;
-      }
     </style>
   </template>
 </dom-module>`;
