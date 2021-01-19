@@ -35,6 +35,7 @@ $_documentContainer.innerHTML = `<dom-module id="vaadin-dialog-overlay-styles" t
 </dom-module>`;
 
 document.head.appendChild($_documentContainer.content);
+
 let memoizedTemplate;
 
 /**
@@ -45,7 +46,6 @@ let memoizedTemplate;
  * See [`<vaadin-overlay>` documentation](https://github.com/vaadin/vaadin-overlay/blob/master/src/vaadin-overlay.html)
  * for `<vaadin-dialog-overlay>` parts.
  *
- * @extends PolymerElement
  * @private
  */
 class DialogOverlayElement extends mixinBehaviors(IronResizableBehavior, OverlayElement) {
@@ -80,7 +80,6 @@ customElements.define(DialogOverlayElement.is, DialogOverlayElement);
 
 
 /**
- *
  * `<vaadin-dialog>` is a Web Component for creating customized modal dialogs. The content of the
  * dialog can be populated in two ways: imperatively by using renderer callback function and
  * declaratively by using Polymer's Templates.
