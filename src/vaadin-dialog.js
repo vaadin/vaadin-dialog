@@ -3,18 +3,16 @@
 Copyright (c) 2017 Vaadin Ltd.
 This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
 */
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-
-import '@polymer/polymer/lib/utils/templatize.js';
+import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
+import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { OverlayElement } from '@vaadin/vaadin-overlay/src/vaadin-overlay.js';
 import { ElementMixin } from '@vaadin/vaadin-element-mixin/vaadin-element-mixin.js';
 import { FlattenedNodesObserver } from '@polymer/polymer/lib/utils/flattened-nodes-observer.js';
 import { ThemePropertyMixin } from '@vaadin/vaadin-themable-mixin/vaadin-theme-property-mixin.js';
 import { DialogDraggableMixin } from './vaadin-dialog-draggable-mixin.js';
 import { DialogResizableMixin } from './vaadin-dialog-resizable-mixin.js';
-import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
-import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
 const $_documentContainer = document.createElement('template');
 
 $_documentContainer.innerHTML = `<dom-module id="vaadin-dialog-overlay-styles" theme-for="vaadin-dialog-overlay">
