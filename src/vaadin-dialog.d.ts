@@ -107,23 +107,6 @@ declare class DialogElement extends
    */
   modeless: boolean;
 
-  /**
-   * Set to true to enable repositioning the dialog by clicking and dragging.
-   *
-   * By default, only the overlay area can be used to drag the element. But,
-   * a child element can be marked as a draggable area by adding a
-   * "`draggable`" class to it, this will by default make all of its children draggable also.
-   * If you want a child element to be draggable
-   * but still have its children non-draggable (by default), mark it with
-   * "`draggable-leaf-only`" class name.
-   */
-  draggable: boolean;
-
-  /**
-   * Set to true to enable resizing the dialog by dragging the corners and edges.
-   */
-  resizable: boolean;
-
   _setTemplateFromNodes(nodes: Node[]): void;
 
   /**
@@ -132,12 +115,6 @@ declare class DialogElement extends
   render(): void;
 
   _setBounds(bounds: DialogOverlayBoundsParam): void;
-
-  _getOverlayBounds(): DialogOverlayBounds;
-
-  _eventInWindow(e: MouseEvent|TouchEvent): boolean;
-
-  __getMouseOrFirstTouchEvent(e: MouseEvent|TouchEvent): MouseEvent|Touch;
 }
 
 declare global {
@@ -152,5 +129,3 @@ export {DialogElement};
 import {DialogRenderer} from '../@types/interfaces';
 
 import {DialogOverlayBoundsParam} from '../@types/interfaces';
-
-import {DialogOverlayBounds} from '../@types/interfaces';

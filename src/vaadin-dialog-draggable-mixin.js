@@ -1,3 +1,5 @@
+import { getMouseOrFirstTouchEvent, getOverlayBounds, eventInWindow } from './vaadin-dialog-utils.js';
+
 const TOUCH_DEVICE = (() => {
   try {
     document.createEvent('TouchEvent');
@@ -14,6 +16,24 @@ export const DialogDraggableMixin = (superClass) =>
   class VaadinDialogDraggableMixin extends superClass {
     static get properties() {
       return {
+        /**
+         * Set to true to enable repositioning the dialog by clicking and dragging.
+         *
+         * By default, only the overlay area can be used to drag the element. But,
+         * a child element can be marked as a draggable area by adding a
+         * "`draggable`" class to it, this will by default make all of its children draggable also.
+         * If you want a child element to be draggable
+         * but still have its children non-draggable (by default), mark it with
+         * "`draggable-leaf-only`" class name.
+         *
+         * @type {boolean}
+         */
+        draggable: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+
         /** @private */
         _touchDevice: {
           type: Boolean,
@@ -63,15 +83,15 @@ export const DialogDraggableMixin = (superClass) =>
 
         if ((isResizerContainer && !isResizerContainerScrollbar) || isContentPart || isDraggable) {
           !isDraggable && e.preventDefault();
-          this._originalBounds = this._getOverlayBounds();
-          const event = this.__getMouseOrFirstTouchEvent(e);
+          this._originalBounds = getOverlayBounds(this.$.overlay);
+          const event = getMouseOrFirstTouchEvent(e);
           this._originalMouseCoords = {top: event.pageY, left: event.pageX};
           window.addEventListener('mouseup', this._stopDrag);
           window.addEventListener('touchend', this._stopDrag);
           window.addEventListener('mousemove', this._drag);
           window.addEventListener('touchmove', this._drag);
           if (this.$.overlay.$.overlay.style.position !== 'absolute') {
-            this._setBounds(this._originalBounds);
+            setOverlayBounds(this.$.overlay, this._originalBounds);
           }
         }
       }
@@ -79,11 +99,11 @@ export const DialogDraggableMixin = (superClass) =>
 
     /** @private */
     _drag(e) {
-      const event = this.__getMouseOrFirstTouchEvent(e);
-      if (this._eventInWindow(event)) {
+      const event = getMouseOrFirstTouchEvent(e);
+      if (eventInWindow(event)) {
         const top = this._originalBounds.top + (event.pageY - this._originalMouseCoords.top);
         const left = this._originalBounds.left + (event.pageX - this._originalMouseCoords.left);
-        this._setBounds({top, left});
+        setOverlayBounds(this.$.overlay, {top, left});
       }
     }
 

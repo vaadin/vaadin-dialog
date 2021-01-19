@@ -12,6 +12,7 @@ import { FlattenedNodesObserver } from '@polymer/polymer/lib/utils/flattened-nod
 import { ThemePropertyMixin } from '@vaadin/vaadin-themable-mixin/vaadin-theme-property-mixin.js';
 import { DialogDraggableMixin } from './vaadin-dialog-draggable-mixin.js';
 import { DialogResizableMixin } from './vaadin-dialog-resizable-mixin.js';
+import { setOverlayBounds } from './vaadin-dialog-utils.js';
 
 const $_documentContainer = document.createElement('template');
 
@@ -232,34 +233,6 @@ class DialogElement extends
         value: false
       },
 
-      /**
-       * Set to true to enable repositioning the dialog by clicking and dragging.
-       *
-       * By default, only the overlay area can be used to drag the element. But,
-       * a child element can be marked as a draggable area by adding a
-       * "`draggable`" class to it, this will by default make all of its children draggable also.
-       * If you want a child element to be draggable
-       * but still have its children non-draggable (by default), mark it with
-       * "`draggable-leaf-only`" class name.
-       *
-       * @type {boolean}
-       */
-      draggable: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
-
-      /**
-       * Set to true to enable resizing the dialog by dragging the corners and edges.
-       * @type {boolean}
-       */
-      resizable: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
-
       /** @private */
       _oldTemplate: Object,
 
@@ -382,22 +355,7 @@ class DialogElement extends
    * @protected
    */
   _setBounds(bounds) {
-    const overlay = this.$.overlay.$.overlay;
-    const parsedBounds = Object.assign({}, bounds);
-
-    if (overlay.style.position !== 'absolute') {
-      overlay.style.position = 'absolute';
-      this.$.overlay.setAttribute('has-bounds-set', '');
-      this.__forceSafariReflow();
-    }
-
-    for (const arg in parsedBounds) {
-      if (typeof parsedBounds[arg] === 'number') {
-        parsedBounds[arg] = `${parsedBounds[arg]}px`;
-      }
-    }
-
-    Object.assign(overlay.style, parsedBounds);
+    setOverlayBounds(this.$.overlay, bounds);
   }
 
   /** @private */
@@ -405,54 +363,6 @@ class DialogElement extends
     if (this.modeless) {
       this.$.overlay.bringToFront();
     }
-  }
-
-  /**
-   * @return {!DialogOverlayBounds}
-   * @protected
-   */
-  _getOverlayBounds() {
-    const overlay = this.$.overlay.$.overlay;
-    const overlayBounds = overlay.getBoundingClientRect();
-    const containerBounds = this.$.overlay.getBoundingClientRect();
-    const top = overlayBounds.top - containerBounds.top;
-    const left = overlayBounds.left - containerBounds.left;
-    const width = overlayBounds.width;
-    const height = overlayBounds.height;
-    return {top, left, width, height};
-  }
-
-  /**
-   * @param {!MouseEvent | !TouchEvent} e
-   * @return {boolean}
-   * @protected
-   */
-  _eventInWindow(e) {
-    return e.clientX >= 0 && e.clientX <= window.innerWidth && e.clientY >= 0 && e.clientY <= window.innerHeight;
-  }
-
-  /**
-   * @param {!MouseEvent | !TouchEvent} e
-   * @return {!MouseEvent | !Touch}
-   * @protected
-   */
-  __getMouseOrFirstTouchEvent(e) {
-    return e.touches ? e.touches[0] : e;
-  }
-
-  /**
-   * Safari 13 renders overflowing elements incorrectly.
-   * This forces it to recalculate height.
-   * @private
-   */
-  __forceSafariReflow() {
-    const scrollPosition = this.$.overlay.$.resizerContainer.scrollTop;
-    const overlay = this.$.overlay.$.overlay;
-    overlay.style.display = 'block';
-    window.requestAnimationFrame(() => {
-      overlay.style.display = '';
-      this.$.overlay.$.resizerContainer.scrollTop = scrollPosition;
-    });
   }
 }
 
