@@ -120,22 +120,6 @@
         dispatchMouseEvent(target, 'mouseup', toXY, mouseButton);
       }
 
-      // This is needed to ensure styles on iOS 10 Safari catch up after resize.
-      function contentStabilized(dialog) {
-        return new Promise((resolve) => {
-          const check = () => {
-            const resizedBounds = dialog.$.overlay.$.overlay.getBoundingClientRect();
-            const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
-            if (Math.floor(resizedBounds.height) === Math.floor(contentPartBounds.height)) {
-              resolve();
-            } else {
-              setTimeout(check, 1);
-            }
-          };
-          check();
-        });
-      }
-
       describe('helper methods', () => {
         var dialogs, dialog1, dialog2, overlay, overlayPart, container;
 
@@ -289,10 +273,8 @@
           expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(bounds.height));
         });
 
-        it('should resize content part when the overlay is resized', async() => {
+        it('should resize content part when the overlay is resized', () => {
           resize(overlayPart.querySelector('.w'), -dx, 0);
-          await contentStabilized(dialog);
-
           const resizedBounds = overlayPart.getBoundingClientRect();
           const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
           expect(Math.floor(resizedBounds.top)).to.be.eql(Math.floor(contentPartBounds.top));
@@ -301,32 +283,22 @@
           expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(contentPartBounds.height));
         });
 
-        it('should resize content part when the overlay is expanded vertically', async() => {
+        it('should resize content part when the overlay is expanded vertically', () => {
           resize(overlayPart.querySelector('.s'), 0, 10);
-          await contentStabilized(dialog);
-
           const resizedBounds = overlayPart.getBoundingClientRect();
           const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
           expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(contentPartBounds.height));
         });
 
-        const ios = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
-        const isIOS10 = ios && String(ios).indexOf('OS 10') > -1;
-
-        if (!isIOS10) {
-          it('should support scrollable full size content', async() => {
-            const container = dialog.$.overlay.firstElementChild;
-            container.style.height = '100%';
-            container.style.width = '100%';
-            container.style.overflow = 'auto';
-            container.textContent = Array(...new Array(10000)).map(() => 'foo').join(' ');
-
-            await contentStabilized(dialog);
-
-            const resizeContainer = dialog.$.overlay.$.resizerContainer;
-            expect(container.offsetHeight).to.equal(resizeContainer.offsetHeight);
-          });
-        }
+        it('should support scrollable full size content', () => {
+          const container = dialog.$.overlay.firstElementChild;
+          container.style.height = '100%';
+          container.style.width = '100%';
+          container.style.overflow = 'auto';
+          container.textContent = Array(...new Array(10000)).map(() => 'foo').join(' ');
+          const resizeContainer = dialog.$.overlay.$.resizerContainer;
+          expect(container.offsetHeight).to.equal(resizeContainer.offsetHeight);
+        });
 
         it('should scroll if the content overflows', () => {
           // Fill the content with a lot of text so that it overflows the viewport
@@ -337,9 +309,8 @@
           expect(resizeContainer.scrollTop).to.equal(1);
         });
 
-        it('should expand content with relative height', async() => {
+        it('should expand content with relative height', () => {
           resize(overlayPart.querySelector('.s'), 0, 10);
-          await contentStabilized(dialog);
 
           // Set the dialog content to have 100% height
           dialog.$.overlay.firstElementChild.style.height = '100%';
@@ -397,14 +368,13 @@
           expect(dialog._setBounds).to.be.calledOnce;
         });
 
-        it('should dispatch resize event with correct details', async() => {
+        it('should dispatch resize event with correct details', () => {
           const onResize = sinon.spy();
           const content = dialog.$.overlay.$.content;
           let detail = {};
           dialog.addEventListener('resize', onResize);
           dialog.addEventListener('resize', (e) => (detail = e.detail));
           resize(overlayPart.querySelector('.w'), -dx, 0);
-          await contentStabilized(dialog);
 
           const resizedBounds = overlayPart.getBoundingClientRect();
           const contentStyles = getComputedStyle(content);
@@ -835,39 +805,35 @@
           expect(overlayPart.offsetHeight).to.equal(container.offsetHeight);
         });
 
-        const ios = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
-        const isIOS10 = ios && String(ios).indexOf('OS 10') > -1;
-        if (!isIOS10) {
-          it('should not overflow when using vaadin-textarea in the content', (done) => {
-            const textarea = document.createElement('vaadin-text-area');
-            textarea.value = Array(20).join('Lorem ipsum dolor sit amet');
-            overlay.content.appendChild(textarea);
-            window.ShadyDOM && window.ShadyDOM.flush();
+        it('should not overflow when using vaadin-textarea in the content', (done) => {
+          const textarea = document.createElement('vaadin-text-area');
+          textarea.value = Array(20).join('Lorem ipsum dolor sit amet');
+          overlay.content.appendChild(textarea);
+          window.ShadyDOM && window.ShadyDOM.flush();
+          overlay.$.content.style.padding = '20px';
+          resize(overlayPart.querySelector('.s'), 0, -50);
+          window.requestAnimationFrame(() => {
+            expect(getComputedStyle(overlayPart).height).to.equal(getComputedStyle(container).height);
+            done();
+          });
+        });
+
+        it('should not reset scroll position on resize', (done) => {
+          const div = document.createElement('div');
+          div.textContent = Array(100).join('Lorem ipsum dolor sit amet');
+          overlay.content.appendChild(div);
+          window.ShadyDOM && window.ShadyDOM.flush();
+          dialog._setBounds({height: 200});
+          window.requestAnimationFrame(() => {
             overlay.$.content.style.padding = '20px';
+            container.scrollTop = 100;
             resize(overlayPart.querySelector('.s'), 0, -50);
             window.requestAnimationFrame(() => {
-              expect(getComputedStyle(overlayPart).height).to.equal(getComputedStyle(container).height);
+              expect(container.scrollTop).to.equal(100);
               done();
             });
           });
-
-          it('should not reset scroll position on resize', (done) => {
-            const div = document.createElement('div');
-            div.textContent = Array(100).join('Lorem ipsum dolor sit amet');
-            overlay.content.appendChild(div);
-            window.ShadyDOM && window.ShadyDOM.flush();
-            dialog._setBounds({height: 200});
-            window.requestAnimationFrame(() => {
-              overlay.$.content.style.padding = '20px';
-              container.scrollTop = 100;
-              resize(overlayPart.querySelector('.s'), 0, -50);
-              window.requestAnimationFrame(() => {
-                expect(container.scrollTop).to.equal(100);
-                done();
-              });
-            });
-          });
-        }
+        });
       });
   </script>
 </body>
