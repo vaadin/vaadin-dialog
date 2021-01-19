@@ -1,22 +1,10 @@
-import {PolymerElement} from '@polymer/polymer/polymer-element.js';
-
-import {OverlayElement} from '@vaadin/vaadin-overlay/src/vaadin-overlay.js';
-
 import {ElementMixin} from '@vaadin/vaadin-element-mixin/vaadin-element-mixin.js';
-
-import {FlattenedNodesObserver} from '@polymer/polymer/lib/utils/flattened-nodes-observer.js';
 
 import {ThemePropertyMixin} from '@vaadin/vaadin-themable-mixin/vaadin-theme-property-mixin.js';
 
 import {DialogDraggableMixin} from './vaadin-dialog-draggable-mixin.js';
 
 import {DialogResizableMixin} from './vaadin-dialog-resizable-mixin.js';
-
-import {IronResizableBehavior} from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
-
-import {mixinBehaviors} from '@polymer/polymer/lib/legacy/class.js';
-
-import {html} from '@polymer/polymer/lib/utils/html-tag.js';
 
 /**
  * `<vaadin-dialog>` is a Web Component for creating customized modal dialogs. The content of the
@@ -76,7 +64,7 @@ declare class DialogElement extends
   ElementMixin(
   DialogDraggableMixin(
   DialogResizableMixin(
-  PolymerElement)))) {
+  HTMLElement)))) {
 
   /**
    * True if the overlay is currently displayed.
@@ -102,6 +90,7 @@ declare class DialogElement extends
    * all.
    */
   ariaLabel: string|null|undefined;
+
   _contentTemplate: HTMLTemplateElement|null|undefined;
 
   /**
@@ -134,17 +123,20 @@ declare class DialogElement extends
    * Set to true to enable resizing the dialog by dragging the corners and edges.
    */
   resizable: boolean;
-  ready(): void;
-  disconnectedCallback(): void;
+
   _setTemplateFromNodes(nodes: Node[]): void;
 
   /**
    * Manually invoke existing renderer.
    */
   render(): void;
+
   _setBounds(bounds: DialogOverlayBoundsParam): void;
+
   _getOverlayBounds(): DialogOverlayBounds;
+
   _eventInWindow(e: MouseEvent|TouchEvent): boolean;
+
   __getMouseOrFirstTouchEvent(e: MouseEvent|TouchEvent): MouseEvent|Touch;
 }
 

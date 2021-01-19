@@ -9,5 +9,4 @@ interface DialogDraggableMixinConstructor {
 export {DialogDraggableMixinConstructor};
 
 interface DialogDraggableMixin {
-  ready(): void;
 }

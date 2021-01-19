@@ -9,10 +9,11 @@ interface DialogResizableMixinConstructor {
 export {DialogResizableMixinConstructor};
 
 interface DialogResizableMixin {
-  ready(): void;
   _startResize(e: MouseEvent|TouchEvent, direction: DialogResizableDirection): void;
+
   _resize(e: MouseEvent|TouchEvent, resizer: DialogResizableDirection): void;
   _stopResize(direction: DialogResizableDirection): void;
+
   _getResizeDimensions(): DialogResizeDimensions;
 }
 

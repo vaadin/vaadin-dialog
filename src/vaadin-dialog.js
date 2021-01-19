@@ -134,7 +134,7 @@ customElements.define(DialogOverlayElement.is, DialogOverlayElement);
  *
  * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
  *
- * @extends PolymerElement
+ * @extends HTMLElement
  * @mixes ThemePropertyMixin
  * @mixes ElementMixin
  * @mixes DialogDraggableMixin
