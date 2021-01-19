@@ -10,31 +10,29 @@ import { OverlayElement } from '@vaadin/vaadin-overlay/src/vaadin-overlay.js';
 import { ElementMixin } from '@vaadin/vaadin-element-mixin/vaadin-element-mixin.js';
 import { FlattenedNodesObserver } from '@polymer/polymer/lib/utils/flattened-nodes-observer.js';
 import { ThemePropertyMixin } from '@vaadin/vaadin-themable-mixin/vaadin-theme-property-mixin.js';
+import { registerStyles, css } from '@vaadin/vaadin-themable-mixin/register-styles.js';
 import { DialogDraggableMixin } from './vaadin-dialog-draggable-mixin.js';
 import { DialogResizableMixin } from './vaadin-dialog-resizable-mixin.js';
 import { setOverlayBounds } from './vaadin-dialog-utils.js';
 
-const $_documentContainer = document.createElement('template');
+registerStyles(
+  'vaadin-dialog-overlay',
+  css`
+    /*
+      NOTE(platosha): Make some min-width to prevent collapsing of the content
+      taking the parent width, e. g., <vaadin-grid> and such.
+    */
+    [part='content'] {
+      min-width: 12em; /* matches the default <vaadin-text-field> width */
+    }
 
-$_documentContainer.innerHTML = `<dom-module id="vaadin-dialog-overlay-styles" theme-for="vaadin-dialog-overlay">
-  <template>
-    <style>
-      /*
-        NOTE(platosha): Make some min-width to prevent collapsing of the content
-        taking the parent width, e. g., <vaadin-grid> and such.
-      */
-      [part="content"] {
-        min-width: 12em; /* matches the default <vaadin-text-field> width */
-      }
+    :host([has-bounds-set]) [part='overlay'] {
+      max-width: none;
+    }
+  `,
+  { moduleId: 'vaadin-dialog-overlay-styles'}
+);
 
-      :host([has-bounds-set]) [part="overlay"] {
-        max-width: none;
-      }
-    </style>
-  </template>
-</dom-module>`;
-
-document.head.appendChild($_documentContainer.content);
 
 let memoizedTemplate;
 

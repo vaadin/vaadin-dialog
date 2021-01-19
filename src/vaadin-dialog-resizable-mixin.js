@@ -1,103 +1,100 @@
+import { registerStyles, css } from '@vaadin/vaadin-themable-mixin/register-styles.js';
 import { getMouseOrFirstTouchEvent, getOverlayBounds, eventInWindow, setOverlayBounds } from './vaadin-dialog-utils.js';
 
-const $_documentContainer = document.createElement('template');
+registerStyles(
+  'vaadin-dialog-overlay',
+  css`
+    [part='overlay'] {
+      position: relative;
+      overflow: visible;
+      max-height: 100%;
+      display: flex;
+    }
 
-$_documentContainer.innerHTML = `<dom-module id="vaadin-dialog-resizable-overlay-styles" theme-for="vaadin-dialog-overlay">
-  <template>
-    <style>
-      [part='overlay'] {
-        position: relative;
-        overflow: visible;
-        max-height: 100%;
-        display: flex;
-      }
+    [part='content'] {
+      box-sizing: border-box;
+      height: 100%;
+    }
 
-      [part='content'] {
-        box-sizing: border-box;
-        height: 100%;
-      }
+    .resizer-container {
+      overflow: auto;
+      flex-grow: 1;
+    }
 
-      .resizer-container {
-        overflow: auto;
-        flex-grow: 1;
-      }
+    [part='overlay'][style] .resizer-container {
+      min-height: 100%;
+      width: 100%;
+    }
 
-      [part='overlay'][style] .resizer-container {
-        min-height: 100%;
-        width: 100%;
-      }
+    :host(:not([resizable])) .resizer {
+      display: none;
+    }
 
-      :host(:not([resizable])) .resizer {
-        display: none;
-      }
+    .resizer {
+      position: absolute;
+      height: 16px;
+      width: 16px;
+    }
 
-      .resizer {
-        position: absolute;
-        height: 16px;
-        width: 16px;
-      }
+    .resizer.edge {
+      height: 8px;
+      width: 8px;
+      top: -4px;
+      right: -4px;
+      bottom: -4px;
+      left: -4px;
+    }
 
-      .resizer.edge {
-        height: 8px;
-        width: 8px;
-        top: -4px;
-        right: -4px;
-        bottom: -4px;
-        left: -4px;
-      }
+    .resizer.edge.n {
+      width: auto;
+      bottom: auto;
+      cursor: ns-resize;
+    }
 
-      .resizer.edge.n {
-        width: auto;
-        bottom: auto;
-        cursor: ns-resize;
-      }
+    .resizer.ne {
+      top: -4px;
+      right: -4px;
+      cursor: nesw-resize;
+    }
 
-      .resizer.ne {
-        top: -4px;
-        right: -4px;
-        cursor: nesw-resize;
-      }
+    .resizer.edge.e {
+      height: auto;
+      left: auto;
+      cursor: ew-resize;
+    }
 
-      .resizer.edge.e {
-        height: auto;
-        left: auto;
-        cursor: ew-resize;
-      }
+    .resizer.se {
+      bottom: -4px;
+      right: -4px;
+      cursor: nwse-resize;
+    }
 
-      .resizer.se {
-        bottom: -4px;
-        right: -4px;
-        cursor: nwse-resize;
-      }
+    .resizer.edge.s {
+      width: auto;
+      top: auto;
+      cursor: ns-resize;
+    }
 
-      .resizer.edge.s {
-        width: auto;
-        top: auto;
-        cursor: ns-resize;
-      }
+    .resizer.sw {
+      bottom: -4px;
+      left: -4px;
+      cursor: nesw-resize;
+    }
 
-      .resizer.sw {
-        bottom: -4px;
-        left: -4px;
-        cursor: nesw-resize;
-      }
+    .resizer.edge.w {
+      height: auto;
+      right: auto;
+      cursor: ew-resize;
+    }
 
-      .resizer.edge.w {
-        height: auto;
-        right: auto;
-        cursor: ew-resize;
-      }
-
-      .resizer.nw {
-        top: -4px;
-        left: -4px;
-        cursor: nwse-resize;
-      }
-    </style>
-  </template>
-</dom-module>`;
-
-document.head.appendChild($_documentContainer.content);
+    .resizer.nw {
+      top: -4px;
+      left: -4px;
+      cursor: nwse-resize;
+    }
+  `,
+  { moduleId: 'vaadin-dialog-resizable-overlay-styles' }
+);
 
 /**
  * @polymerMixin
