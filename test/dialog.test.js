@@ -1,29 +1,31 @@
 import { expect } from '@esm-bundle/chai';
-import sinon from 'sinon';
 import { fixtureSync } from '@open-wc/testing-helpers';
 import { pressAndReleaseKeyOn } from '@polymer/iron-test-helpers/mock-interactions.js';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import '../vaadin-dialog.js';
 
-customElements.define('x-dialog', class XDialog extends PolymerElement {
-  static get template() {
-    return html`
-      <vaadin-dialog id="dialog">
-        <template>
-          <span>[[message]]</span>
-          <input value="{{text::input}}" />
-        </template>
-      </vaadin-dialog>
-    `;
-  }
+customElements.define(
+  'x-dialog',
+  class XDialog extends PolymerElement {
+    static get template() {
+      return html`
+        <vaadin-dialog id="dialog">
+          <template>
+            <span>[[message]]</span>
+            <input value="{{text::input}}" />
+          </template>
+        </vaadin-dialog>
+      `;
+    }
 
-  static get properties() {
-    return {
-      message: String,
-      text: String
-    };
+    static get properties() {
+      return {
+        message: String,
+        text: String
+      };
+    }
   }
-});
+);
 
 describe('vaadin-dialog', () => {
   describe('opened', () => {

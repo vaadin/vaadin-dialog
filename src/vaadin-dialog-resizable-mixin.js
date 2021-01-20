@@ -120,7 +120,7 @@ export const DialogResizableMixin = (superClass) =>
       super.ready();
       this._originalBounds = {};
       this._originalMouseCoords = {};
-      this._resizeListeners = {start: {}, resize: {}, stop: {}};
+      this._resizeListeners = { start: {}, resize: {}, stop: {} };
       this._addResizeListeners();
     }
 
@@ -159,7 +159,7 @@ export const DialogResizableMixin = (superClass) =>
 
         this._originalBounds = this.$.overlay.getBounds();
         const event = getMouseOrFirstTouchEvent(e);
-        this._originalMouseCoords = {top: event.pageY, left: event.pageX};
+        this._originalMouseCoords = { top: event.pageY, left: event.pageX };
         window.addEventListener('mousemove', this._resizeListeners.resize[direction]);
         window.addEventListener('touchmove', this._resizeListeners.resize[direction]);
         window.addEventListener('mouseup', this._resizeListeners.stop[direction]);
@@ -185,21 +185,21 @@ export const DialogResizableMixin = (superClass) =>
               const height = this._originalBounds.height - (event.pageY - this._originalMouseCoords.top);
               const top = this._originalBounds.top + (event.pageY - this._originalMouseCoords.top);
               if (height > minimumSize) {
-                this.$.overlay.setBounds({top, height});
+                this.$.overlay.setBounds({ top, height });
               }
               break;
             }
             case 'e': {
               const width = this._originalBounds.width + (event.pageX - this._originalMouseCoords.left);
               if (width > minimumSize) {
-                this.$.overlay.setBounds({width});
+                this.$.overlay.setBounds({ width });
               }
               break;
             }
             case 's': {
               const height = this._originalBounds.height + (event.pageY - this._originalMouseCoords.top);
               if (height > minimumSize) {
-                this.$.overlay.setBounds({height});
+                this.$.overlay.setBounds({ height });
               }
               break;
             }
@@ -207,7 +207,7 @@ export const DialogResizableMixin = (superClass) =>
               const width = this._originalBounds.width - (event.pageX - this._originalMouseCoords.left);
               const left = this._originalBounds.left + (event.pageX - this._originalMouseCoords.left);
               if (width > minimumSize) {
-                this.$.overlay.setBounds({left, width});
+                this.$.overlay.setBounds({ left, width });
               }
               break;
             }
@@ -227,7 +227,7 @@ export const DialogResizableMixin = (superClass) =>
       window.removeEventListener('touchmove', this._resizeListeners.resize[direction]);
       window.removeEventListener('mouseup', this._resizeListeners.stop[direction]);
       window.removeEventListener('touchend', this._resizeListeners.stop[direction]);
-      this.dispatchEvent(new CustomEvent('resize', {detail: this._getResizeDimensions()}));
+      this.dispatchEvent(new CustomEvent('resize', { detail: this._getResizeDimensions() }));
     }
 
     /**
@@ -236,12 +236,15 @@ export const DialogResizableMixin = (superClass) =>
      */
     _getResizeDimensions() {
       const scrollPosition = this.$.overlay.$.resizerContainer.scrollTop;
-      const {width, height} = getComputedStyle(this.$.overlay.$.overlay);
+      const { width, height } = getComputedStyle(this.$.overlay.$.overlay);
       const content = this.$.overlay.$.content;
-      content.setAttribute('style', 'position: absolute; top: 0; right: 0; bottom: 0; left: 0; box-sizing: content-box; height: auto;');
-      const {width: contentWidth, height: contentHeight} = getComputedStyle(content);
+      content.setAttribute(
+        'style',
+        'position: absolute; top: 0; right: 0; bottom: 0; left: 0; box-sizing: content-box; height: auto;'
+      );
+      const { width: contentWidth, height: contentHeight } = getComputedStyle(content);
       content.removeAttribute('style');
       this.$.overlay.$.resizerContainer.scrollTop = scrollPosition;
-      return {width, height, contentWidth, contentHeight};
+      return { width, height, contentWidth, contentHeight };
     }
   };

@@ -1,10 +1,10 @@
-import {ElementMixin} from '@vaadin/vaadin-element-mixin/vaadin-element-mixin.js';
+import { ElementMixin } from '@vaadin/vaadin-element-mixin/vaadin-element-mixin.js';
 
-import {ThemePropertyMixin} from '@vaadin/vaadin-themable-mixin/vaadin-theme-property-mixin.js';
+import { ThemePropertyMixin } from '@vaadin/vaadin-themable-mixin/vaadin-theme-property-mixin.js';
 
-import {DialogDraggableMixin} from './vaadin-dialog-draggable-mixin.js';
+import { DialogDraggableMixin } from './vaadin-dialog-draggable-mixin.js';
 
-import {DialogResizableMixin} from './vaadin-dialog-resizable-mixin.js';
+import { DialogResizableMixin } from './vaadin-dialog-resizable-mixin.js';
 
 /**
  * `<vaadin-dialog>` is a Web Component for creating customized modal dialogs. The content of the
@@ -59,13 +59,9 @@ import {DialogResizableMixin} from './vaadin-dialog-resizable-mixin.js';
  *
  * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
  */
-declare class DialogElement extends
-  ThemePropertyMixin(
-  ElementMixin(
-  DialogDraggableMixin(
-  DialogResizableMixin(
-  HTMLElement)))) {
-
+declare class DialogElement extends ThemePropertyMixin(
+  ElementMixin(DialogDraggableMixin(DialogResizableMixin(HTMLElement)))
+) {
   /**
    * True if the overlay is currently displayed.
    */
@@ -89,9 +85,9 @@ declare class DialogElement extends
    * default) means that the `aria-label` attribute is not present at
    * all.
    */
-  ariaLabel: string|null|undefined;
+  ariaLabel: string | null | undefined;
 
-  _contentTemplate: HTMLTemplateElement|null|undefined;
+  _contentTemplate: HTMLTemplateElement | null | undefined;
 
   /**
    * Custom function for rendering the content of the dialog.
@@ -100,7 +96,7 @@ declare class DialogElement extends
    * - `root` The root container DOM element. Append your content to it.
    * - `dialog` The reference to the `<vaadin-dialog>` element.
    */
-  renderer: DialogRenderer|null|undefined;
+  renderer: DialogRenderer | null | undefined;
 
   /**
    * Set to true to remove backdrop and allow click events on background elements.
@@ -116,12 +112,11 @@ declare class DialogElement extends
 }
 
 declare global {
-
   interface HTMLElementTagNameMap {
-    "vaadin-dialog": DialogElement;
+    'vaadin-dialog': DialogElement;
   }
 }
 
-export {DialogElement};
+export { DialogElement };
 
-import {DialogRenderer} from '../@types/interfaces';
+import { DialogRenderer } from '../@types/interfaces';

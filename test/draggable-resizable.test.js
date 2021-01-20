@@ -571,7 +571,7 @@ describe('touch', () => {
       x: Math.floor(bounds.left + bounds.width / 2),
       y: Math.floor(bounds.top + bounds.height / 2)
     };
-    const toXY = { x: fromXY.x + dx, y: fromXY.y + dx };
+    const toXY = { x: fromXY.x + dx, y: fromXY.y + dy };
     dispatchTouchEvent(target, 'touchstart', fromXY, multitouch);
     dispatchTouchEvent(target, 'touchmove', toXY, multitouch);
     dispatchTouchEvent(target, 'touchend', toXY);

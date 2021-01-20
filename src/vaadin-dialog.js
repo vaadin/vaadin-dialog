@@ -29,9 +29,8 @@ registerStyles(
       max-width: none;
     }
   `,
-  { moduleId: 'vaadin-dialog-overlay-styles'}
+  { moduleId: 'vaadin-dialog-overlay-styles' }
 );
-
 
 let memoizedTemplate;
 
@@ -106,7 +105,7 @@ class DialogOverlayElement extends mixinBehaviors(IronResizableBehavior, Overlay
     const left = overlayBounds.left - containerBounds.left;
     const width = overlayBounds.width;
     const height = overlayBounds.height;
-    return {top, left, width, height};
+    return { top, left, width, height };
   }
 
   /**
@@ -127,7 +126,6 @@ class DialogOverlayElement extends mixinBehaviors(IronResizableBehavior, Overlay
 }
 
 customElements.define(DialogOverlayElement.is, DialogOverlayElement);
-
 
 /**
  * `<vaadin-dialog>` is a Web Component for creating customized modal dialogs. The content of the
@@ -188,23 +186,30 @@ customElements.define(DialogOverlayElement.is, DialogOverlayElement);
  * @mixes DialogDraggableMixin
  * @mixes DialogResizableMixin
  */
-class DialogElement extends
-  ThemePropertyMixin(
-    ElementMixin(
-      DialogDraggableMixin(
-        DialogResizableMixin(
-          PolymerElement)))) {
+class DialogElement extends ThemePropertyMixin(
+  ElementMixin(DialogDraggableMixin(DialogResizableMixin(PolymerElement)))
+) {
   static get template() {
     return html`
-    <style>
-      :host {
-        display: none;
-      }
-    </style>
+      <style>
+        :host {
+          display: none;
+        }
+      </style>
 
-    <vaadin-dialog-overlay id="overlay" on-opened-changed="_onOverlayOpened" on-mousedown="_bringOverlayToFront" on-touchstart="_bringOverlayToFront" theme\$="[[theme]]" modeless="[[modeless]]" with-backdrop="[[!modeless]]" resizable\$="[[resizable]]" focus-trap="">
-    </vaadin-dialog-overlay>
-`;
+      <vaadin-dialog-overlay
+        id="overlay"
+        on-opened-changed="_onOverlayOpened"
+        on-mousedown="_bringOverlayToFront"
+        on-touchstart="_bringOverlayToFront"
+        theme$="[[theme]]"
+        modeless="[[modeless]]"
+        with-backdrop="[[!modeless]]"
+        resizable$="[[resizable]]"
+        focus-trap=""
+      >
+      </vaadin-dialog-overlay>
+    `;
   }
 
   static get is() {
@@ -305,7 +310,7 @@ class DialogElement extends
     this.$.overlay.addEventListener('vaadin-overlay-outside-click', this._handleOutsideClick.bind(this));
     this.$.overlay.addEventListener('vaadin-overlay-escape-press', this._handleEscPress.bind(this));
 
-    this._observer = new FlattenedNodesObserver(this, info => {
+    this._observer = new FlattenedNodesObserver(this, (info) => {
       this._setTemplateFromNodes(info.addedNodes);
     });
   }
@@ -315,7 +320,8 @@ class DialogElement extends
    * @protected
    */
   _setTemplateFromNodes(nodes) {
-    this._contentTemplate = nodes.filter(node => node.localName && node.localName === 'template')[0] || this._contentTemplate;
+    this._contentTemplate =
+      nodes.filter((node) => node.localName && node.localName === 'template')[0] || this._contentTemplate;
   }
 
   /** @private */
@@ -345,7 +351,7 @@ class DialogElement extends
     this._oldRenderer = renderer;
 
     if (renderer) {
-      this.$.overlay.setProperties({owner: this, renderer: renderer});
+      this.$.overlay.setProperties({ owner: this, renderer: renderer });
     }
   }
 

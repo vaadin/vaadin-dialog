@@ -69,7 +69,8 @@ export const DialogDraggableMixin = (superClass) =>
       if (this.draggable && (e.button === 0 || e.touches)) {
         const resizerContainer = this.$.overlay.$.resizerContainer;
         const isResizerContainer = e.target === resizerContainer;
-        const isResizerContainerScrollbar = e.offsetX > resizerContainer.clientWidth || e.offsetY > resizerContainer.clientHeight;
+        const isResizerContainerScrollbar =
+          e.offsetX > resizerContainer.clientWidth || e.offsetY > resizerContainer.clientHeight;
         const isContentPart = e.target === this.$.overlay.$.content;
 
         const isDraggable = e.composedPath().some((node, index) => {
@@ -85,7 +86,7 @@ export const DialogDraggableMixin = (superClass) =>
           !isDraggable && e.preventDefault();
           this._originalBounds = this.$.overlay.getBounds();
           const event = getMouseOrFirstTouchEvent(e);
-          this._originalMouseCoords = {top: event.pageY, left: event.pageX};
+          this._originalMouseCoords = { top: event.pageY, left: event.pageX };
           window.addEventListener('mouseup', this._stopDrag);
           window.addEventListener('touchend', this._stopDrag);
           window.addEventListener('mousemove', this._drag);
@@ -103,7 +104,7 @@ export const DialogDraggableMixin = (superClass) =>
       if (eventInWindow(event)) {
         const top = this._originalBounds.top + (event.pageY - this._originalMouseCoords.top);
         const left = this._originalBounds.left + (event.pageX - this._originalMouseCoords.left);
-        this.$.overlay.setBounds({top, left});
+        this.$.overlay.setBounds({ top, left });
       }
     }
 
