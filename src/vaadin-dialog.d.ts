@@ -6,6 +6,8 @@ import { DialogDraggableMixin } from './vaadin-dialog-draggable-mixin.js';
 
 import { DialogResizableMixin } from './vaadin-dialog-resizable-mixin.js';
 
+import { DialogRenderer } from './interfaces';
+
 /**
  * `<vaadin-dialog>` is a Web Component for creating customized modal dialogs. The content of the
  * dialog can be populated in two ways: imperatively by using renderer callback function and
@@ -119,4 +121,3 @@ declare global {
 
 export { DialogElement };
 
-import { DialogRenderer } from '../@types/interfaces';

@@ -1,5 +1,3 @@
-export { DialogDraggableMixin };
-
 declare function DialogDraggableMixin<T extends new (...args: any[]) => {}>(
   base: T
 ): T & DialogDraggableMixinConstructor;
@@ -7,8 +5,6 @@ declare function DialogDraggableMixin<T extends new (...args: any[]) => {}>(
 interface DialogDraggableMixinConstructor {
   new (...args: any[]): DialogDraggableMixin;
 }
-
-export { DialogDraggableMixinConstructor };
 
 interface DialogDraggableMixin {
   /**
@@ -23,3 +19,5 @@ interface DialogDraggableMixin {
    */
   draggable: boolean;
 }
+
+export { DialogDraggableMixin, DialogDraggableMixinConstructor };

@@ -1,4 +1,4 @@
-export { DialogResizableMixin };
+import { DialogResizableDirection, DialogResizeDimensions } from './interfaces';
 
 declare function DialogResizableMixin<T extends new (...args: any[]) => {}>(
   base: T
@@ -7,8 +7,6 @@ declare function DialogResizableMixin<T extends new (...args: any[]) => {}>(
 interface DialogResizableMixinConstructor {
   new (...args: any[]): DialogResizableMixin;
 }
-
-export { DialogResizableMixinConstructor };
 
 interface DialogResizableMixin {
   /**
@@ -25,6 +23,4 @@ interface DialogResizableMixin {
   _getResizeDimensions(): DialogResizeDimensions;
 }
 
-import { DialogResizableDirection } from '../@types/interfaces';
-
-import { DialogResizeDimensions } from '../@types/interfaces';
+export { DialogResizableMixin, DialogResizableMixinConstructor };

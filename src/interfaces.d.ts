@@ -1,4 +1,4 @@
-import { DialogElement } from '../src/vaadin-dialog.js';
+import { DialogElement } from './vaadin-dialog.js';
 
 export type DialogRenderer = (root: HTMLElement, dialog?: DialogElement) => void;
 
