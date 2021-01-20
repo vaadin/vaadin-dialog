@@ -454,10 +454,7 @@ describe('draggable', () => {
     resize(container.querySelector('.s'), 0, dx);
     const bounds = container.getBoundingClientRect();
     const coords = { y: bounds.top + bounds.height / 2, x: bounds.left + bounds.width / 2 };
-    let target = document.elementFromPoint(coords.x, coords.y);
-    if (!window.ShadyDOM) {
-      target = dialog.$.overlay.shadowRoot.elementFromPoint(coords.x, coords.y);
-    }
+    const target = dialog.$.overlay.shadowRoot.elementFromPoint(coords.x, coords.y);
     drag(target);
     const draggedBounds = container.getBoundingClientRect();
     expect(Math.floor(draggedBounds.top)).to.be.eql(Math.floor(bounds.top + dx));
