@@ -1,5 +1,5 @@
 import { registerStyles, css } from '@vaadin/vaadin-themable-mixin/register-styles.js';
-import { getMouseOrFirstTouchEvent, getOverlayBounds, eventInWindow, setOverlayBounds } from './vaadin-dialog-utils.js';
+import { getMouseOrFirstTouchEvent, eventInWindow } from './vaadin-dialog-utils.js';
 
 registerStyles(
   'vaadin-dialog-overlay',
@@ -157,7 +157,7 @@ export const DialogResizableMixin = (superClass) =>
       if (e.button === 0 || e.touches) {
         e.preventDefault();
 
-        this._originalBounds = getOverlayBounds(this.$.overlay);
+        this._originalBounds = this.$.overlay.getBounds();
         const event = getMouseOrFirstTouchEvent(e);
         this._originalMouseCoords = {top: event.pageY, left: event.pageX};
         window.addEventListener('mousemove', this._resizeListeners.resize[direction]);
@@ -165,7 +165,7 @@ export const DialogResizableMixin = (superClass) =>
         window.addEventListener('mouseup', this._resizeListeners.stop[direction]);
         window.addEventListener('touchend', this._resizeListeners.stop[direction]);
         if (this.$.overlay.$.overlay.style.position !== 'absolute') {
-          setOverlayBounds(this.$.overlay, this._originalBounds);
+          this.$.overlay.setBounds(this._originalBounds);
         }
       }
     }
@@ -185,21 +185,21 @@ export const DialogResizableMixin = (superClass) =>
               const height = this._originalBounds.height - (event.pageY - this._originalMouseCoords.top);
               const top = this._originalBounds.top + (event.pageY - this._originalMouseCoords.top);
               if (height > minimumSize) {
-                setOverlayBounds(this.$.overlay, {top, height});
+                this.$.overlay.setBounds({top, height});
               }
               break;
             }
             case 'e': {
               const width = this._originalBounds.width + (event.pageX - this._originalMouseCoords.left);
               if (width > minimumSize) {
-                setOverlayBounds(this.$.overlay, {width});
+                this.$.overlay.setBounds({width});
               }
               break;
             }
             case 's': {
               const height = this._originalBounds.height + (event.pageY - this._originalMouseCoords.top);
               if (height > minimumSize) {
-                setOverlayBounds(this.$.overlay, {height});
+                this.$.overlay.setBounds({height});
               }
               break;
             }
@@ -207,7 +207,7 @@ export const DialogResizableMixin = (superClass) =>
               const width = this._originalBounds.width - (event.pageX - this._originalMouseCoords.left);
               const left = this._originalBounds.left + (event.pageX - this._originalMouseCoords.left);
               if (width > minimumSize) {
-                setOverlayBounds(this.$.overlay, {left, width});
+                this.$.overlay.setBounds({left, width});
               }
               break;
             }

@@ -1,4 +1,4 @@
-import { getMouseOrFirstTouchEvent, getOverlayBounds, eventInWindow } from './vaadin-dialog-utils.js';
+import { getMouseOrFirstTouchEvent, eventInWindow } from './vaadin-dialog-utils.js';
 
 const TOUCH_DEVICE = (() => {
   try {
@@ -83,7 +83,7 @@ export const DialogDraggableMixin = (superClass) =>
 
         if ((isResizerContainer && !isResizerContainerScrollbar) || isContentPart || isDraggable) {
           !isDraggable && e.preventDefault();
-          this._originalBounds = getOverlayBounds(this.$.overlay);
+          this._originalBounds = this.$.overlay.getBounds();
           const event = getMouseOrFirstTouchEvent(e);
           this._originalMouseCoords = {top: event.pageY, left: event.pageX};
           window.addEventListener('mouseup', this._stopDrag);
@@ -91,7 +91,7 @@ export const DialogDraggableMixin = (superClass) =>
           window.addEventListener('mousemove', this._drag);
           window.addEventListener('touchmove', this._drag);
           if (this.$.overlay.$.overlay.style.position !== 'absolute') {
-            setOverlayBounds(this.$.overlay, this._originalBounds);
+            this.$.overlay.setBounds(this._originalBounds);
           }
         }
       }
@@ -103,7 +103,7 @@ export const DialogDraggableMixin = (superClass) =>
       if (eventInWindow(event)) {
         const top = this._originalBounds.top + (event.pageY - this._originalMouseCoords.top);
         const left = this._originalBounds.left + (event.pageX - this._originalMouseCoords.left);
-        setOverlayBounds(this.$.overlay, {top, left});
+        this.$.overlay.setBounds({top, left});
       }
     }
 

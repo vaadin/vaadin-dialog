@@ -113,8 +113,6 @@ declare class DialogElement extends
    * Manually invoke existing renderer.
    */
   render(): void;
-
-  _setBounds(bounds: DialogOverlayBoundsParam): void;
 }
 
 declare global {
@@ -127,5 +125,3 @@ declare global {
 export {DialogElement};
 
 import {DialogRenderer} from '../@types/interfaces';
-
-import {DialogOverlayBoundsParam} from '../@types/interfaces';

@@ -13,7 +13,6 @@ import { ThemePropertyMixin } from '@vaadin/vaadin-themable-mixin/vaadin-theme-p
 import { registerStyles, css } from '@vaadin/vaadin-themable-mixin/register-styles.js';
 import { DialogDraggableMixin } from './vaadin-dialog-draggable-mixin.js';
 import { DialogResizableMixin } from './vaadin-dialog-resizable-mixin.js';
-import { setOverlayBounds } from './vaadin-dialog-utils.js';
 
 registerStyles(
   'vaadin-dialog-overlay',
@@ -71,6 +70,59 @@ class DialogOverlayElement extends mixinBehaviors(IronResizableBehavior, Overlay
 
       withBackdrop: Boolean
     };
+  }
+
+  /**
+   * Updates the coordinates of the overlay.
+   * @param {!DialogOverlayBoundsParam} bounds
+   */
+  setBounds(bounds) {
+    const overlay = this.$.overlay;
+    const parsedBounds = Object.assign({}, bounds);
+
+    if (overlay.style.position !== 'absolute') {
+      overlay.style.position = 'absolute';
+      this.setAttribute('has-bounds-set', '');
+      this.__forceSafariReflow();
+    }
+
+    for (const arg in parsedBounds) {
+      if (typeof parsedBounds[arg] === 'number') {
+        parsedBounds[arg] = `${parsedBounds[arg]}px`;
+      }
+    }
+
+    Object.assign(overlay.style, parsedBounds);
+  }
+
+  /**
+   * Retrieves the coordinates of the overlay.
+   * @return {!DialogOverlayBounds}
+   */
+  getBounds() {
+    const overlayBounds = this.$.overlay.getBoundingClientRect();
+    const containerBounds = this.getBoundingClientRect();
+    const top = overlayBounds.top - containerBounds.top;
+    const left = overlayBounds.left - containerBounds.left;
+    const width = overlayBounds.width;
+    const height = overlayBounds.height;
+    return {top, left, width, height};
+  }
+
+  /**
+   * Safari 13 renders overflowing elements incorrectly.
+   * This forces it to recalculate height.
+   * @private
+   */
+  __forceSafariReflow() {
+    const scrollPosition = this.$.resizerContainer.scrollTop;
+    const overlay = this.$.overlay;
+    overlay.style.display = 'block';
+
+    requestAnimationFrame(() => {
+      overlay.style.display = '';
+      this.$.resizerContainer.scrollTop = scrollPosition;
+    });
   }
 }
 
@@ -345,14 +397,6 @@ class DialogElement extends
     if (this.noCloseOnEsc) {
       e.preventDefault();
     }
-  }
-
-  /**
-   * @param {!DialogOverlayBoundsParam} bounds
-   * @protected
-   */
-  _setBounds(bounds) {
-    setOverlayBounds(this.$.overlay, bounds);
   }
 
   /** @private */
