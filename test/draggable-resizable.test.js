@@ -1,105 +1,35 @@
-<!doctype html>
-<head>
-  <meta charset="UTF-8">
-  <title>vaadin-dialog tests</title>
-  <script src="../../../wct-browser-legacy/browser.js"></script>
-  <script src="../../../@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
-  <script type="module" src="../../../@polymer/test-fixture/test-fixture.js"></script>
-  <script type="module" src="../../../@polymer/iron-test-helpers/iron-test-helpers.js"></script>
-  <script type="module" src="../src/vaadin-dialog.js"></script>
-  <script type="module" src="../../../@vaadin/vaadin-text-field/vaadin-text-area.js"></script>
-  <script type="module" src="../../../@polymer/polymer/polymer-element.js"></script>
-  <script type="module" src="../../../@polymer/polymer/lib/utils/html-tag.js"></script>
-</head>
-
-<body>
-  <style>
-    /* Hack for Safari to make the overlay take full size */
-    vaadin-dialog-overlay[opening] {
-      animation: 0 foo;
-    }
-  </style>
-
-  <test-fixture id="default">
-    <template>
-      <vaadin-dialog opened>
-        <template>
-          <div>Simple dialog</div>
-        </template>
-      </vaadin-dialog>
-    </template>
-  </test-fixture>
-
-  <test-fixture id="modeless">
-    <template>
-      <vaadin-dialog modeless draggable opened>
-        <template>
-          <div>Modeless dialog 1</div>
-        </template>
-      </vaadin-dialog>
-      <vaadin-dialog modeless draggable opened>
-        <template>
-          <div>Modeless dialog 2</div>
-        </template>
-      </vaadin-dialog>
-    </template>
-  </test-fixture>
-
-  <test-fixture id="resizable">
-    <template>
-      <vaadin-dialog resizable opened modeless>
-        <template>
-          <div>Resizable dialog</div>
-        </template>
-      </vaadin-dialog>
-    </template>
-  </test-fixture>
-
-  <test-fixture id="draggable">
-    <template>
-      <vaadin-dialog draggable opened modeless>
-        <template>
-          <div>Draggable dialog</div>
-          <div class="draggable">Draggable area</div>
-          <internally-draggable></internally-draggable>
-          <button>OK</button>
-        </template>
-      </vaadin-dialog>
-    </template>
-  </test-fixture>
-
-  <test-fixture id="bring-to-front">
-    <template>
-      <vaadin-dialog id="modalDialog">
-        <template>
-          MODAL_DIALOG
-        </template>
-      </vaadin-dialog>
-      <vaadin-dialog id="modelessDialog" modeless>
-        <template>
-          MODELESS_DIALOG
-        </template>
-      </vaadin-dialog>
-    </template>
-  </test-fixture>
-
-  <test-fixture id="overflow">
-    <template>
-      <vaadin-dialog resizable opened modeless>
-        <template>
-        </template>
-      </vaadin-dialog>
-    </template>
-  </test-fixture>
-
-  <script type="module">
-import '@polymer/test-fixture/test-fixture.js';
-import '@polymer/iron-test-helpers/iron-test-helpers.js';
+import { expect } from '@esm-bundle/chai';
+import sinon from 'sinon';
+import { fixtureSync, nextFrame } from '@open-wc/testing-helpers';
+import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
+import { registerStyles, css } from '@vaadin/vaadin-themable-mixin/register-styles.js';
 import '../src/vaadin-dialog.js';
-import '@vaadin/vaadin-text-field/vaadin-text-area.js';
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-function dispatchMouseEvent(target, type, coords = {x: 0, y: 0}, button = 0) {
+
+registerStyles(
+  'vaadin-dialog-overlay',
+  css`
+    :host([opening]),
+    :host([closing]),
+    :host([opening]) [part='overlay'],
+    :host([closing]) [part='overlay'] {
+      animation: none !important;
+    }
+  `,
+  { moduleId: 'not-animated-dialog-overlay' }
+);
+
+customElements.define(
+  'internally-draggable',
+  class extends PolymerElement {
+    static get template() {
+      return html` <div class="draggable">
+        <span>draggable</span>
+      </div>`;
+    }
+  }
+);
+
+function dispatchMouseEvent(target, type, coords = { x: 0, y: 0 }, button = 0) {
   const e = new MouseEvent(type, {
     view: window,
     bubbles: true,
@@ -116,10 +46,10 @@ function dispatchMouseEvent(target, type, coords = {x: 0, y: 0}, button = 0) {
 function resize(target, dx, dy, mouseButton = 0) {
   const bounds = target.getBoundingClientRect();
   const fromXY = {
-    x: Math.floor(bounds.left + (bounds.width / 2)),
-    y: Math.floor(bounds.top + (bounds.height / 2))
+    x: Math.floor(bounds.left + bounds.width / 2),
+    y: Math.floor(bounds.top + bounds.height / 2)
   };
-  const toXY = {x: fromXY.x + dx, y: fromXY.y + dy};
+  const toXY = { x: fromXY.x + dx, y: fromXY.y + dy };
   dispatchMouseEvent(target, 'mousedown', fromXY, mouseButton);
   dispatchMouseEvent(target, 'mousemove', fromXY, mouseButton);
   dispatchMouseEvent(target, 'mousemove', toXY, mouseButton);
@@ -127,10 +57,24 @@ function resize(target, dx, dy, mouseButton = 0) {
 }
 
 describe('helper methods', () => {
-  var dialogs, dialog1, dialog2, overlay, overlayPart, container;
+  let wrapper, dialogs, dialog1, dialog2, overlay, overlayPart, container;
 
   beforeEach(() => {
-    dialogs = fixture('modeless');
+    wrapper = fixtureSync(`
+      <div>
+        <vaadin-dialog modeless draggable opened>
+          <template>
+            <div>Modeless dialog 1</div>
+          </template>
+        </vaadin-dialog>
+        <vaadin-dialog modeless draggable opened>
+          <template>
+            <div>Modeless dialog 2</div>
+          </template>
+        </vaadin-dialog>
+      </div>
+    `);
+    dialogs = wrapper.children;
     dialog1 = dialogs[0];
     dialog2 = dialogs[1];
     overlay = dialog1.$.overlay;
@@ -139,8 +83,8 @@ describe('helper methods', () => {
   });
 
   it('should set bounds correctly', () => {
-    const overlayBounds = dialog1._getOverlayBounds();
-    dialog1._setBounds(overlayBounds);
+    const overlayBounds = dialog1.$.overlay.getBounds();
+    dialog1.$.overlay.setBounds(overlayBounds);
     expect(Math.floor(overlayPart.style.top)).to.be.eql(Math.floor(overlayBounds.top + 'px'));
     expect(Math.floor(overlayPart.style.left)).to.be.eql(Math.floor(overlayBounds.left + 'px'));
     expect(Math.floor(overlayPart.style.width)).to.be.eql(Math.floor(overlayBounds.width + 'px'));
@@ -169,42 +113,27 @@ describe('helper methods', () => {
 
   it('should not move to top if not modeless', () => {
     dialog1.modeless = false;
-    sinon.spy(dialog1.$.overlay, 'bringToFront');
+    const spy = sinon.spy(dialog1.$.overlay, 'bringToFront');
     dispatchMouseEvent(container, 'mousedown');
-    expect(dialog1.$.overlay.bringToFront).to.not.be.called;
+    expect(spy.called).to.be.false;
     expect(dialog1.$.overlay._last).to.be.false;
   });
 });
 
-describe('modeless', () => {
-  var dialog, overlay, backdrop;
-
-  beforeEach(() => {
-    dialog = fixture('default');
-    overlay = dialog.$.overlay;
-    backdrop = overlay.$.backdrop;
-  });
-
-  it('should be modal by default', () => {
-    expect(dialog.$.overlay.modeless).to.eql(false);
-    expect(dialog.$.overlay.$.backdrop.hidden).to.eql(false);
-  });
-
-  it('should not be modal when modeless is true', () => {
-    dialog.modeless = true;
-    expect(overlay.modeless).to.eql(true);
-    expect(backdrop.hidden).to.eql(true);
-  });
-});
-
 describe('resizable', () => {
-  var dialog, overlayPart, bounds, dx;
+  let dialog, overlayPart, bounds, dx;
 
   beforeEach(() => {
-    dialog = fixture('resizable');
+    dialog = fixtureSync(`
+      <vaadin-dialog resizable opened modeless>
+        <template>
+          <div>Resizable dialog</div>
+        </template>
+      </vaadin-dialog>
+    `);
     overlayPart = dialog.$.overlay.$.overlay;
     bounds = overlayPart.getBoundingClientRect();
-    dx = 0;
+    dx = 30;
   });
 
   it('should resize dialog from top right corner', () => {
@@ -281,6 +210,7 @@ describe('resizable', () => {
 
   it('should resize content part when the overlay is resized', () => {
     resize(overlayPart.querySelector('.w'), -dx, 0);
+
     const resizedBounds = overlayPart.getBoundingClientRect();
     const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
     expect(Math.floor(resizedBounds.top)).to.be.eql(Math.floor(contentPartBounds.top));
@@ -291,8 +221,12 @@ describe('resizable', () => {
 
   it('should resize content part when the overlay is expanded vertically', () => {
     resize(overlayPart.querySelector('.s'), 0, 10);
+
     const resizedBounds = overlayPart.getBoundingClientRect();
     const contentPartBounds = dialog.$.overlay.$.content.getBoundingClientRect();
+    expect(Math.floor(resizedBounds.top)).to.be.eql(Math.floor(contentPartBounds.top));
+    expect(Math.floor(resizedBounds.left)).to.be.eql(Math.floor(contentPartBounds.left));
+    expect(Math.floor(resizedBounds.width)).to.be.eql(Math.floor(contentPartBounds.width));
     expect(Math.floor(resizedBounds.height)).to.be.eql(Math.floor(contentPartBounds.height));
   });
 
@@ -301,14 +235,19 @@ describe('resizable', () => {
     container.style.height = '100%';
     container.style.width = '100%';
     container.style.overflow = 'auto';
-    container.textContent = Array(...new Array(10000)).map(() => 'foo').join(' ');
+    container.textContent = Array(...new Array(10000))
+      .map(() => 'foo')
+      .join(' ');
+
     const resizeContainer = dialog.$.overlay.$.resizerContainer;
     expect(container.offsetHeight).to.equal(resizeContainer.offsetHeight);
   });
 
   it('should scroll if the content overflows', () => {
     // Fill the content with a lot of text so that it overflows the viewport
-    dialog.$.overlay.firstElementChild.textContent = Array(...new Array(10000)).map(() => 'foo').join(' ');
+    dialog.$.overlay.firstElementChild.textContent = Array(...new Array(10000))
+      .map(() => 'foo')
+      .join(' ');
 
     const resizeContainer = dialog.$.overlay.$.resizerContainer;
     resizeContainer.scrollTop = 1;
@@ -342,8 +281,8 @@ describe('resizable', () => {
     dialog._resizeListeners.stop['n'] = sinon.spy();
     dispatchMouseEvent(resizer, 'mousemove');
     dispatchMouseEvent(resizer, 'mouseup');
-    expect(dialog._resizeListeners.resize['n']).not.to.be.called;
-    expect(dialog._resizeListeners.stop['n']).not.to.be.called;
+    expect(dialog._resizeListeners.resize['n'].called).to.be.false;
+    expect(dialog._resizeListeners.stop['n'].called).to.be.false;
   });
 
   it('should not resize dialog past window left edge', () => {
@@ -359,19 +298,19 @@ describe('resizable', () => {
   it('should be able to resize dialog to be wider than window', () => {
     dialog.$.overlay.$.content.style.padding = '20px';
     dx = 20;
-    dialog._setBounds({left: -dx});
+    dialog.$.overlay.setBounds({ left: -dx });
     dx = Math.floor(window.innerWidth - bounds.width + 5);
     resize(overlayPart.querySelector('.e'), dx, 0);
     const resizedBounds = overlayPart.getBoundingClientRect();
     expect(Math.floor(resizedBounds.width)).to.be.eql(Math.floor(bounds.width + dx));
   });
 
-  it('should snap to pixels only once', () => {
-    dialog._setBounds = sinon.spy();
+  it('should not set bounds again after position is set to absolute', () => {
+    const spy = sinon.spy(dialog.$.overlay, 'setBounds');
     dispatchMouseEvent(overlayPart.querySelector('.n'), 'mousedown');
     dialog.$.overlay.$.overlay.style.position = 'absolute';
     dispatchMouseEvent(overlayPart.querySelector('.n'), 'mousedown');
-    expect(dialog._setBounds).to.be.calledOnce;
+    expect(spy.calledOnce).to.be.true;
   });
 
   it('should dispatch resize event with correct details', () => {
@@ -391,7 +330,7 @@ describe('resizable', () => {
       parseInt(contentStyles.borderBottomWidth);
     content.style.boxSizing = 'content-box';
 
-    expect(onResize).to.be.calledOnce;
+    expect(onResize.calledOnce).to.be.true;
     expect(Math.floor(resizedBounds.width)).to.be.eql(parseInt(detail.width));
     expect(Math.floor(resizedBounds.height)).to.be.eql(parseInt(detail.height));
     expect(parseInt(detail.contentWidth)).to.be.eql(parseInt(contentStyles.width));
@@ -400,34 +339,32 @@ describe('resizable', () => {
 });
 
 describe('draggable', () => {
-  var dialog, container, content, button, bounds, dx;
+  let dialog, container, content, button, bounds, dx;
 
   function drag(target, mouseButton = 0) {
     const bounds = target.getBoundingClientRect();
     const fromXY = {
-      x: Math.floor(bounds.left + (bounds.width / 2)),
-      y: Math.floor(bounds.top + (bounds.height / 2))
+      x: Math.floor(bounds.left + bounds.width / 2),
+      y: Math.floor(bounds.top + bounds.height / 2)
     };
-    const toXY = {x: fromXY.x + dx, y: fromXY.y + dx};
+    const toXY = { x: fromXY.x + dx, y: fromXY.y + dx };
     dispatchMouseEvent(target, 'mousedown', fromXY, mouseButton);
     dispatchMouseEvent(target, 'mousemove', fromXY, mouseButton);
     dispatchMouseEvent(target, 'mousemove', toXY, mouseButton);
     dispatchMouseEvent(target, 'mouseup', toXY, mouseButton);
   }
 
-  before(() => {
-    customElements.define('internally-draggable', class extends PolymerElement {
-      static get template() {
-        return html`
-        <div class="draggable">
-          <span>draggable</span>
-        </div>`;
-      }
-    });
-  });
-
   beforeEach(() => {
-    dialog = fixture('draggable');
+    dialog = fixtureSync(`
+      <vaadin-dialog draggable opened modeless>
+        <template>
+          <div>Draggable dialog</div>
+          <div class="draggable">Draggable area</div>
+          <internally-draggable></internally-draggable>
+          <button>OK</button>
+        </template>
+      </vaadin-dialog>
+    `);
     container = dialog.$.overlay.$.resizerContainer;
     content = dialog.$.overlay.$.content;
     button = dialog.$.overlay.querySelector('button');
@@ -516,7 +453,7 @@ describe('draggable', () => {
   it('should drag and move dialog after resizing', () => {
     resize(container.querySelector('.s'), 0, dx);
     const bounds = container.getBoundingClientRect();
-    const coords = {y: bounds.top + (bounds.height / 2), x: bounds.left + (bounds.width / 2)};
+    const coords = { y: bounds.top + bounds.height / 2, x: bounds.left + bounds.width / 2 };
     let target = document.elementFromPoint(coords.x, coords.y);
     if (!window.ShadyDOM) {
       target = dialog.$.overlay.shadowRoot.elementFromPoint(coords.x, coords.y);
@@ -535,19 +472,15 @@ describe('draggable', () => {
   });
 
   it('should not drag dialog if mousedown on .resizer-container scrollbar', () => {
-    const boundsSpy = sinon.spy(dialog, '_setBounds');
+    const boundsSpy = sinon.spy(dialog.$.overlay, 'setBounds');
     content.style.width = content.clientWidth * 4 + 'px';
     const scrollbarHeight = container.offsetHeight - container.clientHeight;
     const containerBounds = container.getBoundingClientRect();
     dispatchMouseEvent(container, 'mousedown', {
-      x: containerBounds.left + (containerBounds.width / 2),
-      y: containerBounds.top + containerBounds.height - (scrollbarHeight / 2)
+      x: containerBounds.left + containerBounds.width / 2,
+      y: containerBounds.top + containerBounds.height - scrollbarHeight / 2
     });
-    if (scrollbarHeight) {
-      expect(boundsSpy).not.to.be.called;
-    } else {
-      expect(boundsSpy).to.be.calledOnce;
-    }
+    expect(boundsSpy.called).to.equal(!scrollbarHeight);
   });
 
   it('should not drag dialog if not left mouse button', () => {
@@ -561,7 +494,7 @@ describe('draggable', () => {
     const onClick = sinon.spy();
     button.addEventListener('click', onClick);
     button.dispatchEvent(new MouseEvent('click'));
-    expect(onClick).to.be.calledOnce;
+    expect(onClick.calledOnce).to.be.true;
   });
 
   it('should remove mousemove and mouseup event handlers after drag', () => {
@@ -570,12 +503,12 @@ describe('draggable', () => {
     dialog._stopDrag = sinon.spy();
     dispatchMouseEvent(content, 'mousemove');
     dispatchMouseEvent(content, 'mouseup');
-    expect(dialog._drag).not.to.be.called;
-    expect(dialog._stopDrag).not.to.be.called;
+    expect(dialog._drag.called).to.be.false;
+    expect(dialog._stopDrag.called).to.be.false;
   });
 
   it('should not drag dialog past window left edge', () => {
-    dx = -(Math.floor(window.innerWidth + dx));
+    dx = -Math.floor(window.innerWidth + dx);
     drag(container);
     const draggedBounds = container.getBoundingClientRect();
     expect(Math.floor(draggedBounds.top)).to.be.eql(Math.floor(bounds.top));
@@ -584,49 +517,48 @@ describe('draggable', () => {
     expect(Math.floor(draggedBounds.height)).to.be.eql(Math.floor(bounds.height));
   });
 
-  it('should snap to pixels only once', () => {
-    dialog._setBounds = sinon.spy();
+  it('should not update overlay bounds with position: absolute', () => {
+    const spy = sinon.spy(dialog.$.overlay, 'setBounds');
     dispatchMouseEvent(content, 'mousedown');
     dialog.$.overlay.$.overlay.style.position = 'absolute';
     dispatchMouseEvent(content, 'mousedown');
-    expect(dialog._setBounds).to.be.calledOnce;
+    expect(spy.calledOnce).to.be.true;
   });
 
-  it('should not reset scroll position on dragstart', (done) => {
+  it('should not reset scroll position on dragstart', async () => {
     dialog.modeless = true;
     button.style.marginBottom = '200px';
-    dialog._setBounds({height: '100px'});
-    requestAnimationFrame(() => {
-      container.scrollTop = 100;
-      expect(container.scrollTop).to.equal(100);
-      drag(container);
-      expect(container.scrollTop).to.equal(100);
-      done();
-    });
+    dialog.$.overlay.setBounds({ height: '100px' });
+    await nextFrame();
+    container.scrollTop = 100;
+    expect(container.scrollTop).to.equal(100);
+    drag(container);
+    expect(container.scrollTop).to.equal(100);
   });
 });
 
 describe('touch', () => {
-
-  function dispatchTouchEvent(target, type, coords = {x: 0, y: 0}, multitouch = false) {
+  function dispatchTouchEvent(target, type, coords = { x: 0, y: 0 }, multitouch = false) {
     const e = new CustomEvent(type, {
       bubbles: true,
       cancelable: true,
-      composed: true,
+      composed: true
     });
-    e.touches = [{
-      clientX: coords.x,
-      clientY: coords.y,
-      pageX: coords.x,
-      pageY: coords.y,
-    }];
+    e.touches = [
+      {
+        clientX: coords.x,
+        clientY: coords.y,
+        pageX: coords.x,
+        pageY: coords.y
+      }
+    ];
 
     if (multitouch) {
       e.touches.push({
         clientX: coords.x + 10,
         clientY: coords.y + 10,
         pageX: coords.x + 10,
-        pageY: coords.y + 10,
+        pageY: coords.y + 10
       });
     }
     target.dispatchEvent(e);
@@ -636,10 +568,10 @@ describe('touch', () => {
   function touchDrag(target, dx = 1, dy = 1, multitouch = false) {
     const bounds = target.getBoundingClientRect();
     const fromXY = {
-      x: Math.floor(bounds.left + (bounds.width / 2)),
-      y: Math.floor(bounds.top + (bounds.height / 2))
+      x: Math.floor(bounds.left + bounds.width / 2),
+      y: Math.floor(bounds.top + bounds.height / 2)
     };
-    const toXY = {x: fromXY.x + dx, y: fromXY.y + dx};
+    const toXY = { x: fromXY.x + dx, y: fromXY.y + dx };
     dispatchTouchEvent(target, 'touchstart', fromXY, multitouch);
     dispatchTouchEvent(target, 'touchmove', toXY, multitouch);
     dispatchTouchEvent(target, 'touchend', toXY);
@@ -648,11 +580,11 @@ describe('touch', () => {
   function touchResize(target, dx = 1, dy = 1, multitouch = false) {
     const bounds = target.getBoundingClientRect();
     const fromXY = {
-      x: Math.floor(bounds.left + (bounds.width / 2)),
-      y: Math.floor(bounds.top + (bounds.height / 2))
+      x: Math.floor(bounds.left + bounds.width / 2),
+      y: Math.floor(bounds.top + bounds.height / 2)
     };
 
-    const toXY = {x: fromXY.x + dx, y: fromXY.y + dy};
+    const toXY = { x: fromXY.x + dx, y: fromXY.y + dy };
     dispatchTouchEvent(target, 'touchstart', fromXY, multitouch);
     dispatchTouchEvent(target, 'touchmove', toXY, multitouch);
     dispatchTouchEvent(target, 'touchend', toXY);
@@ -666,11 +598,32 @@ describe('touch', () => {
     return elementFromPoint;
   }
 
-  let resizable, draggable, resizableOverlay, resizableOverlayPart, draggableOverlay, resizableContainer, draggableContainer;
+  let resizable,
+    draggable,
+    resizableOverlay,
+    resizableOverlayPart,
+    draggableOverlay,
+    resizableContainer,
+    draggableContainer;
 
   beforeEach(() => {
-    resizable = fixture('resizable');
-    draggable = fixture('draggable');
+    resizable = fixtureSync(`
+      <vaadin-dialog resizable opened modeless>
+        <template>
+          <div>Resizable dialog</div>
+        </template>
+      </vaadin-dialog>
+    `);
+    draggable = fixtureSync(`
+      <vaadin-dialog draggable opened modeless>
+        <template>
+          <div>Draggable dialog</div>
+          <div class="draggable">Draggable area</div>
+          <internally-draggable></internally-draggable>
+          <button>OK</button>
+        </template>
+      </vaadin-dialog>
+    `);
     resizableOverlay = resizable.$.overlay;
     draggableOverlay = draggable.$.overlay;
     resizableContainer = resizableOverlay.$.resizerContainer;
@@ -701,8 +654,7 @@ describe('touch', () => {
     const bounds = draggableContainer.getBoundingClientRect();
     touchDrag(draggableContainer, d, d, true);
     const draggedBounds = draggableContainer.getBoundingClientRect();
-    ['top', 'left'].forEach(prop =>
-      expect(Math.floor(draggedBounds[prop])).to.be.eql(Math.floor(bounds[prop])));
+    ['top', 'left'].forEach((prop) => expect(Math.floor(draggedBounds[prop])).to.be.eql(Math.floor(bounds[prop])));
   });
 
   it('should not resize dialog if there more than two fingers used', () => {
@@ -710,8 +662,9 @@ describe('touch', () => {
     const bounds = resizableContainer.getBoundingClientRect();
     touchResize(resizableOverlayPart.querySelector('.ne'), d, -d, true);
     const resizedBounds = resizableContainer.getBoundingClientRect();
-    ['top', 'left', 'width', 'height'].forEach(prop =>
-      expect(Math.floor(resizedBounds[prop])).to.be.eql(Math.floor(bounds[prop])));
+    ['top', 'left', 'width', 'height'].forEach((prop) =>
+      expect(Math.floor(resizedBounds[prop])).to.be.eql(Math.floor(bounds[prop]))
+    );
   });
 
   it('should drag and move dialog', () => {
@@ -726,7 +679,7 @@ describe('touch', () => {
   it('should remove event handlers after drag', () => {
     touchDrag(draggableContainer);
     const bounds = draggableContainer.getBoundingClientRect();
-    dispatchTouchEvent(draggableContainer, 'touchmove', {x: 1, y: 1});
+    dispatchTouchEvent(draggableContainer, 'touchmove', { x: 1, y: 1 });
     const draggedBounds = draggableContainer.getBoundingClientRect();
     expect(draggedBounds.left).to.eql(bounds.left);
     expect(draggedBounds.top).to.eql(bounds.top);
@@ -746,24 +699,36 @@ describe('touch', () => {
   it('should remove event handlers after resize', () => {
     touchResize(resizableOverlayPart.querySelector('.ne'));
     const bounds = resizableContainer.getBoundingClientRect();
-    dispatchTouchEvent(resizableOverlayPart.querySelector('.ne'), 'touchmove', {x: 1, y: 1});
+    dispatchTouchEvent(resizableOverlayPart.querySelector('.ne'), 'touchmove', { x: 1, y: 1 });
     const resizedBounds = resizableContainer.getBoundingClientRect();
     expect(resizedBounds.left).to.eql(bounds.left);
     expect(resizedBounds.top).to.eql(bounds.top);
 
     const removeSpy = sinon.spy(resizable, '_stopResize');
-    dispatchTouchEvent(resizableOverlayPart.querySelector('.ne'), 'touchend', {x: 1, y: 1});
+    dispatchTouchEvent(resizableOverlayPart.querySelector('.ne'), 'touchend', { x: 1, y: 1 });
     expect(removeSpy.called).to.be.false;
   });
-
 });
 
-// This also covers use-case of a overlay element (eg. combo-box) inside
-// of a modal dialog
-describe('modal and modeless dialog together', () => {
-  let modalDialog, modelessDialog;
+describe('bring to front', () => {
+  let wrapper, dialogs, modalDialog, modelessDialog;
+
   beforeEach(() => {
-    const dialogs = fixture('bring-to-front');
+    wrapper = fixtureSync(`
+      <div>
+        <vaadin-dialog id="modalDialog">
+          <template>
+            MODAL_DIALOG
+          </template>
+        </vaadin-dialog>
+        <vaadin-dialog id="modelessDialog" modeless>
+          <template>
+            MODELESS_DIALOG
+          </template>
+        </vaadin-dialog>
+      </div>
+    `);
+    dialogs = wrapper.children;
     modalDialog = dialogs[0];
     modelessDialog = dialogs[1];
   });
@@ -776,6 +741,7 @@ describe('modal and modeless dialog together', () => {
 
     const windowCenterHeight = window.innerHeight / 2;
     const windowCenterWidth = window.innerWidth / 2;
+
     let actualTextContent = document.elementFromPoint(windowCenterWidth, windowCenterHeight).innerText.trim();
     expect(actualTextContent).to.be.equals(expectedTextContent);
 
@@ -789,11 +755,15 @@ describe('modal and modeless dialog together', () => {
   });
 });
 
-describe('dialog with overflowing content', () => {
+describe('overflowing content', () => {
   let dialog, overlay, overlayPart, container;
 
   beforeEach(() => {
-    dialog = fixture('overflow');
+    dialog = fixtureSync(`
+      <vaadin-dialog resizable opened modeless>
+        <template></template>
+      </vaadin-dialog>
+    `);
     overlay = dialog.$.overlay;
     overlayPart = overlay.$.overlay;
     container = overlay.$.resizerContainer;
@@ -805,41 +775,31 @@ describe('dialog with overflowing content', () => {
     div.style.overflow = 'auto';
     div.textContent = Array(100).join('Lorem ipsum dolor sit amet');
     overlay.content.appendChild(div);
-    window.ShadyDOM && window.ShadyDOM.flush();
     // emulate removing "pointer-events: none"
     overlayPart.setAttribute('style', '');
     expect(overlayPart.offsetHeight).to.equal(container.offsetHeight);
   });
 
-  it('should not overflow when using vaadin-textarea in the content', (done) => {
+  it('should not overflow when using vaadin-textarea in the content', async () => {
     const textarea = document.createElement('vaadin-text-area');
     textarea.value = Array(20).join('Lorem ipsum dolor sit amet');
     overlay.content.appendChild(textarea);
-    window.ShadyDOM && window.ShadyDOM.flush();
     overlay.$.content.style.padding = '20px';
     resize(overlayPart.querySelector('.s'), 0, -50);
-    window.requestAnimationFrame(() => {
-      expect(getComputedStyle(overlayPart).height).to.equal(getComputedStyle(container).height);
-      done();
-    });
+    await nextFrame();
+    expect(getComputedStyle(overlayPart).height).to.equal(getComputedStyle(container).height);
   });
 
-  it('should not reset scroll position on resize', (done) => {
+  it('should not reset scroll position on resize', async () => {
     const div = document.createElement('div');
     div.textContent = Array(100).join('Lorem ipsum dolor sit amet');
     overlay.content.appendChild(div);
-    window.ShadyDOM && window.ShadyDOM.flush();
-    dialog._setBounds({height: 200});
-    window.requestAnimationFrame(() => {
-      overlay.$.content.style.padding = '20px';
-      container.scrollTop = 100;
-      resize(overlayPart.querySelector('.s'), 0, -50);
-      window.requestAnimationFrame(() => {
-        expect(container.scrollTop).to.equal(100);
-        done();
-      });
-    });
+    dialog.$.overlay.setBounds({ height: 200 });
+    await nextFrame();
+    overlay.$.content.style.padding = '20px';
+    container.scrollTop = 100;
+    resize(overlayPart.querySelector('.s'), 0, -50);
+    await nextFrame();
+    expect(container.scrollTop).to.equal(100);
   });
 });
-</script>
-</body>
