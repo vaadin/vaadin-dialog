@@ -43,6 +43,10 @@ describe('vaadin-dialog', () => {
       backdrop = overlay.$.backdrop;
     });
 
+    it('should have a valid version number', () => {
+      expect(dialog.constructor.version).to.match(/^(\d+\.)?(\d+\.)?(\d+)(-(alpha|beta)\d+)?$/);
+    });
+
     describe('attributes', () => {
       it('overlay should have the `dialog` role', () => {
         expect(overlay.getAttribute('role')).to.be.eql('dialog');
