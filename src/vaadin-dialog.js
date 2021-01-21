@@ -209,9 +209,8 @@ class DialogElement extends ThemePropertyMixin(
         modeless="[[modeless]]"
         with-backdrop="[[!modeless]]"
         resizable$="[[resizable]]"
-        focus-trap=""
-      >
-      </vaadin-dialog-overlay>
+        focus-trap
+      ></vaadin-dialog-overlay>
     `;
   }
 
