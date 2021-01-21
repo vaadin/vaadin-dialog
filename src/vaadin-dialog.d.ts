@@ -6,7 +6,7 @@ import { DialogDraggableMixin } from './vaadin-dialog-draggable-mixin.js';
 
 import { DialogResizableMixin } from './vaadin-dialog-resizable-mixin.js';
 
-import { DialogRenderer } from './interfaces';
+import { DialogEventMap, DialogRenderer } from './interfaces';
 
 /**
  * `<vaadin-dialog>` is a Web Component for creating customized modal dialogs. The content of the
@@ -111,6 +111,18 @@ declare class DialogElement extends ThemePropertyMixin(
    * Manually invoke existing renderer.
    */
   render(): void;
+
+  addEventListener<K extends keyof DialogEventMap>(
+    type: K,
+    listener: (this: DialogElement, ev: DialogEventMap[K]) => void,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+
+  removeEventListener<K extends keyof DialogEventMap>(
+    type: K,
+    listener: (this: DialogElement, ev: DialogEventMap[K]) => void,
+    options?: boolean | EventListenerOptions
+  ): void;
 }
 
 declare global {
@@ -120,4 +132,3 @@ declare global {
 }
 
 export { DialogElement };
-
