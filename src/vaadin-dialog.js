@@ -180,6 +180,9 @@ customElements.define(DialogOverlayElement.is, DialogOverlayElement);
  *
  * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
  *
+ * @fires {CustomEvent} resize - Fired when the dialog resize is finished.
+ * @fires {CustomEvent} opened-changed - Fired when the `opened` property changes.
+ *
  * @extends HTMLElement
  * @mixes ThemePropertyMixin
  * @mixes ElementMixin
