@@ -8,5 +8,12 @@ describe('vaadin-dialog', () => {
         .waitForVisible(locator, 15000)
         .assertView(`${theme}-default`, locator);
     });
+
+    it(`${theme}-themes`, function () {
+      return this.browser
+        .url(`themes.html?theme=${theme}`)
+        .waitForVisible(locator, 15000)
+        .assertView(`${theme}-themes`, locator);
+    });
   });
 });
