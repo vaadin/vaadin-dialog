@@ -14,12 +14,21 @@ gemini.suite('vaadin-dialog', function(rootSuite) {
     .before(wait)
     .after(goToAboutBlank);
 
+  const locator = 'body[data-ready]';
+
   ['lumo', 'material'].forEach(theme => {
     gemini.suite(`default-tests-${theme}`, function(suite) {
       suite
         .setUrl(`default.html?theme=${theme}`)
         .setCaptureElements('body')
         .capture('dialog');
+    });
+
+    it(`${theme}-no-padding`, function() {
+      return this.browser
+        .url(`no-padding.html?theme=${theme}`)
+        .waitForVisible(locator, 15000)
+        .assertView(`${theme}-no-padding`, locator);
     });
   });
 

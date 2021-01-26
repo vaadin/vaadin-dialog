@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+
+<head lang="en">
+  <meta charset="UTF-8" />
+  <title>Dialog tests</title>
+  <script>
+    window.polymerSkipLoadingFontRoboto = true;
+  </script>
+  <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script>
+    const theme = window.location.search.replace(/.*theme=(\w+).*/, '$1') || 'lumo';
+    document.write(`<link rel="import" href="../../theme/${theme}/vaadin-dialog.html">`);
+  </script>
+</head>
+
+<body style="height: 600px">
+  <vaadin-dialog theme="no-padding" opened>
+    <template>
+      <div>A very simple dialog with no padding</div>
+      <button>OK</button>
+    </template>
+  </vaadin-dialog>
+
+</body>
