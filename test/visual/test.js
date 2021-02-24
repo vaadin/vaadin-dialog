@@ -14,8 +14,6 @@ gemini.suite('vaadin-dialog', function(rootSuite) {
     .before(wait)
     .after(goToAboutBlank);
 
-  const locator = 'body[data-ready]';
-
   ['lumo', 'material'].forEach(theme => {
     gemini.suite(`default-tests-${theme}`, function(suite) {
       suite
@@ -24,11 +22,11 @@ gemini.suite('vaadin-dialog', function(rootSuite) {
         .capture('dialog');
     });
 
-    it(`${theme}-no-padding`, function() {
-      return this.browser
-        .url(`no-padding.html?theme=${theme}`)
-        .waitForVisible(locator, 15000)
-        .assertView(`${theme}-no-padding`, locator);
+    gemini.suite(`${theme}-no-padding`, function(suite) {
+      suite
+        .setUrl(`no-padding.html?theme=${theme}`)
+        .setCaptureElements('body')
+        .capture(`dialog`);
     });
   });
 
