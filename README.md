@@ -10,6 +10,12 @@
 
 # &lt;vaadin-dialog&gt;
 
+> ⚠️ 　Starting from Vaadin 20, this project has migrated to [`vaadin-web-components`](https://github.com/vaadin/vaadin-web-components/tree/master/packages/vaadin-dialog) *monorepository*.
+>
+> This repository is used for Vaadin 14 LTS and Vaadin 19.
+
+---
+
 [Live Demo ↗](https://vaadin.com/components/vaadin-dialog/html-examples/dialog-basic-demos)
 |
 [API documentation ↗](https://vaadin.com/components/vaadin-dialog/html-api)
