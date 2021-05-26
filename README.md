@@ -1,27 +1,22 @@
+# &lt;vaadin-dialog&gt;
+
+> ⚠️ Starting from Vaadin 20, the source code and issues for this component are migrated to the [`vaadin/web-components`](https://github.com/vaadin/web-components/tree/master/packages/vaadin-dialog) monorepository.
+> This repository contains the source code and releases of `<vaadin-dialog>` for the Vaadin versions 10 to 19.
+
+[&lt;vaadin-dialog&gt;](https://vaadin.com/components/vaadin-dialog) is a Web Component for customized modal dialogs, part of the [Vaadin components](https://vaadin.com/components).
+
+[Live Demo ↗](https://vaadin.com/components/vaadin-dialog/html-examples/dialog-basic-demos)
+|
+[API documentation ↗](https://vaadin.com/components/vaadin-dialog/html-api)
+
 [![npm version](https://badgen.net/npm/v/@vaadin/vaadin-dialog)](https://www.npmjs.com/package/@vaadin/vaadin-dialog)
 [![Bower version](https://badgen.net/github/release/vaadin/vaadin-dialog)](https://github.com/vaadin/vaadin-dialog/releases)
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/vaadin/vaadin-dialog)
 [![Build Status](https://travis-ci.org/vaadin/vaadin-dialog.svg?branch=master)](https://travis-ci.org/vaadin/vaadin-dialog)
 [![Coverage Status](https://coveralls.io/repos/github/vaadin/vaadin-dialog/badge.svg?branch=master)](https://coveralls.io/github/vaadin/vaadin-dialog?branch=master)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/vaadin/web-components?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
 [![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg)](https://vaadin.com/directory/component/vaadinvaadin-dialog)
 [![Stars on vaadin.com/directory](https://img.shields.io/vaadin-directory/star/vaadinvaadin-dialog.svg)](https://vaadin.com/directory/component/vaadinvaadin-dialog)
-
-# &lt;vaadin-dialog&gt;
-
-> ⚠️ 　Starting from Vaadin 20, this project has migrated to [`vaadin-web-components`](https://github.com/vaadin/vaadin-web-components/tree/master/packages/vaadin-dialog) *monorepository*.
->
-> This repository is used for Vaadin 14 LTS and Vaadin 19.
-
----
-
-[Live Demo ↗](https://vaadin.com/components/vaadin-dialog/html-examples/dialog-basic-demos)
-|
-[API documentation ↗](https://vaadin.com/components/vaadin-dialog/html-api)
-
-
-[&lt;vaadin-dialog&gt;](https://vaadin.com/components/vaadin-dialog) is a Web Component for customized modal dialogs, part of the [Vaadin components](https://vaadin.com/components).
 
 <!--
 ```
