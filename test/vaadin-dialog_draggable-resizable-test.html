@@ -542,7 +542,7 @@
           const bounds = container.getBoundingClientRect();
           const coords = {y: bounds.top + (bounds.height / 2), x: bounds.left + (bounds.width / 2)};
           let target = document.elementFromPoint(coords.x, coords.y);
-          if (!window.ShadyDOM) {
+          if (dialog.$.overlay.shadowRoot.elementFromPoint) {
             target = dialog.$.overlay.shadowRoot.elementFromPoint(coords.x, coords.y);
           }
           drag(target);
