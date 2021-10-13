@@ -93,6 +93,8 @@
   </test-fixture>
 
   <script>
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
       function dispatchMouseEvent(target, type, coords = {x: 0, y: 0}, button = 0) {
         const e = new MouseEvent(type, {
           view: window,
@@ -537,10 +539,12 @@
           expect(Math.floor(draggedBounds.left)).to.be.eql(Math.floor(bounds.left + dx));
         });
 
-        it('should drag and move dialog after resizing', () => {
+        // TODO: unskip this test after https://github.com/webcomponents/polyfills/pull/472 is released
+        (isSafari && window.ShadyDOM ? it.skip : it)('should drag and move dialog after resizing', () => {
           resize(container.querySelector('.s'), 0, dx);
           const bounds = container.getBoundingClientRect();
           const coords = {y: bounds.top + (bounds.height / 2), x: bounds.left + (bounds.width / 2)};
+          // FIXME: the ShadyDOM polyfill breaks when calling document.elementFromPoint on older versions of Safari (<=10)
           let target = document.elementFromPoint(coords.x, coords.y);
           if (dialog.$.overlay.shadowRoot.elementFromPoint) {
             target = dialog.$.overlay.shadowRoot.elementFromPoint(coords.x, coords.y);
@@ -715,8 +719,10 @@
           expect(e.defaultPrevented).to.be.false;
         });
 
-        it('should bring to front on touch start', () => {
+        // TODO: unskip this test after https://github.com/webcomponents/polyfills/pull/472 is released
+        (isSafari && window.ShadyDOM ? it.skip : it)('should bring to front on touch start', () => {
           dispatchTouchEvent(resizableContainer, 'touchstart');
+          // FIXME: the ShadyDOM polyfill crashes when calling document.elementFromPoint on older versions of Safari (<=10)
           expect(getFrontmostOverlayFromScreenCenter()).to.equal(resizableOverlay);
         });
 
@@ -791,8 +797,8 @@
           modalDialog = dialogs[0];
           modelessDialog = dialogs[1];
         });
-
-        it('modal should not bring to front and close if a modeless dialog is on top', () => {
+        // TODO: unskip this test after https://github.com/webcomponents/polyfills/pull/472 is released
+        (isSafari && window.ShadyDOM ? it.skip : it)('modal should not bring to front and close if a modeless dialog is on top', () => {
           modalDialog.opened = true;
           modelessDialog.opened = true;
 
@@ -800,6 +806,7 @@
 
           const windowCenterHeight = window.innerHeight / 2;
           const windowCenterWidth = window.innerWidth / 2;
+          // FIXME: the ShadyDOM polyfill crashes when calling document.elementFromPoint on older versions of Safari (<=10)
           let actualTextContent = document.elementFromPoint(windowCenterWidth, windowCenterHeight).innerText.trim();
           expect(actualTextContent).to.be.equals(expectedTextContent);
 
