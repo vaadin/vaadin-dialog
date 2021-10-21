@@ -21,6 +21,13 @@ gemini.suite('vaadin-dialog', function(rootSuite) {
         .setCaptureElements('body')
         .capture('dialog');
     });
+
+    gemini.suite(`${theme}-no-padding`, function(suite) {
+      suite
+        .setUrl(`no-padding.html?theme=${theme}`)
+        .setCaptureElements('body')
+        .capture(`dialog`);
+    });
   });
 
 });
